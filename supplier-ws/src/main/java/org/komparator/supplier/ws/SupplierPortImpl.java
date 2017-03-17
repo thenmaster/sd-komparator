@@ -7,19 +7,18 @@ import javax.jws.WebService;
 
 import org.komparator.supplier.domain.Product;
 import org.komparator.supplier.domain.Purchase;
-import org.komparator.supplier.domain.QuantityException;
 import org.komparator.supplier.domain.Supplier;
 
 // TODO
-//@WebService(
-//		endpointInterface = "org.komparator.supplier.ws.SupplierPortType", 
-//		wsdlLocation = "...", 
-//		name = "SupplierWebService", 
-//		portName = "...Port", 
-//		targetNamespace = "...", 
-//		serviceName = "...Service"
-//)
-public class SupplierPortImpl { // implements SupplierPortType {
+@WebService(
+		endpointInterface = "org.komparator.supplier.ws.SupplierPortType",
+		wsdlLocation = "supplier.1_0.wsdl",
+		name = "SupplierWebService",
+		portName = "SupplierPort",
+		targetNamespace = "http://ws.supplier.komparator.org/",
+		serviceName = "SupplierService"
+)
+public class SupplierPortImpl implements SupplierPortType {
 
 	// end point manager
 	private SupplierEndpointManager endpointManager;
@@ -33,16 +32,16 @@ public class SupplierPortImpl { // implements SupplierPortType {
 	public ProductView getProduct(String productId) throws BadProductId_Exception {
 		// check product id
 		if (productId == null)
-			throwBadProductId("Product identifier cannot be null!");
+			this.throwBadProductId("Product identifier cannot be null!");
 		productId = productId.trim();
 		if (productId.length() == 0)
-			throwBadProductId("Product identifier cannot be empty or whitespace!");
+			this.throwBadProductId("Product identifier cannot be empty or whitespace!");
 
 		// retrieve product
 		Supplier supplier = Supplier.getInstance();
 		Product p = supplier.getProduct(productId);
 		if (p != null) {
-			ProductView pv = newProductView(p);
+			ProductView pv = this.newProductView(p);
 			// product found!
 			return pv;
 		}
@@ -52,20 +51,20 @@ public class SupplierPortImpl { // implements SupplierPortType {
 
 	public List<ProductView> searchProducts(String descText) throws BadText_Exception {
 		// TODO
-		
-		
-		
-		
+
+
+
+
 		return null;
 	}
 
 	public String buyProduct(String productId, int quantity)
 			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception {
 		// TODO
-		
-		
-		
-		
+
+
+
+
 		return null;
 	}
 
@@ -90,14 +89,14 @@ public class SupplierPortImpl { // implements SupplierPortType {
 	public void createProduct(ProductView productToCreate) throws BadProductId_Exception, BadProduct_Exception {
 		// check null
 		if (productToCreate == null)
-			throwBadProduct("Product view cannot be null!");
+			this.throwBadProduct("Product view cannot be null!");
 		// check id
 		String productId = productToCreate.getId();
 		if (productId == null)
-			throwBadProductId("Product identifier cannot be null!");
+			this.throwBadProductId("Product identifier cannot be null!");
 		productId = productId.trim();
 		if (productId.length() == 0)
-			throwBadProductId("Product identifier cannot be empty or whitespace!");
+			this.throwBadProductId("Product identifier cannot be empty or whitespace!");
 		// check description
 		String productDesc = productToCreate.getDesc();
 		if (productDesc == null)
@@ -105,11 +104,11 @@ public class SupplierPortImpl { // implements SupplierPortType {
 		// check quantity
 		int quantity = productToCreate.getQuantity();
 		if (quantity <= 0)
-			throwBadProduct("Quantity must be a positive number!");
+			this.throwBadProduct("Quantity must be a positive number!");
 		// check price
 		int price = productToCreate.getPrice();
 		if (price <= 0)
-			throwBadProduct("Price must be a positive number!");
+			this.throwBadProduct("Price must be a positive number!");
 
 		// create new product
 		Supplier s = Supplier.getInstance();
@@ -121,7 +120,7 @@ public class SupplierPortImpl { // implements SupplierPortType {
 		List<ProductView> pvs = new ArrayList<ProductView>();
 		for (String pid : supplier.getProductsIDs()) {
 			Product p = supplier.getProduct(pid);
-			ProductView pv = newProductView(p);
+			ProductView pv = this.newProductView(p);
 			pvs.add(pv);
 		}
 		return pvs;
@@ -132,7 +131,7 @@ public class SupplierPortImpl { // implements SupplierPortType {
 		List<PurchaseView> pvs = new ArrayList<PurchaseView>();
 		for (String pid : supplier.getPurchasesIDs()) {
 			Purchase p = supplier.getPurchase(pid);
-			PurchaseView pv = newPurchaseView(p);
+			PurchaseView pv = this.newPurchaseView(p);
 			pvs.add(pv);
 		}
 		return pvs;
