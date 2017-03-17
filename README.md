@@ -1,15 +1,10 @@
 # Projeto de Sistemas Distribuídos 2016-2017 #
 
-Grupo CXX
-*(preencher com identificador de grupo e depois apagar esta linha)*
+Grupo A24
 
-... ... ...
-
-... ... ...
-
-... ... ...
-*(preencher com nome, número e email de membro do grupo e depois apagar esta linha)*
-
+Pedro Correia 81002 pedro.correia.105@gmail.com
+Nuno Gonçalves 81082 nunombg@gmail.com
+Nuno Santos 81703 nuno_913@hotmail.com
 
 -------------------------------------------------------------------------------
 **FIM**
