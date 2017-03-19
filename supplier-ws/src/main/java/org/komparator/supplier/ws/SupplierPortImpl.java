@@ -2,6 +2,7 @@ package org.komparator.supplier.ws;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.jws.WebService;
 
@@ -9,7 +10,6 @@ import org.komparator.supplier.domain.Product;
 import org.komparator.supplier.domain.Purchase;
 import org.komparator.supplier.domain.Supplier;
 
-// TODO
 @WebService(
 		endpointInterface = "org.komparator.supplier.ws.SupplierPortType",
 		wsdlLocation = "supplier.1_0.wsdl",
@@ -50,19 +50,27 @@ public class SupplierPortImpl implements SupplierPortType {
 	}
 
 	public List<ProductView> searchProducts(String descText) throws BadText_Exception {
-		// TODO
-
-
-
-
-		return null;
+		// check product description
+		if (descText == null)
+			this.throwBadText("Product description cannot be null!");
+		descText = descText.trim();
+		if (descText.length() == 0)
+			this.throwBadText("Product description cannot be empty or whitespace!");
+		
+		List<ProductView> list = new ArrayList<ProductView>();
+		// retrieve product
+		Supplier supplier = Supplier.getInstance();
+		for (Entry<String, Product> entry : supplier.getProducts().entrySet()){
+			Product p = entry.getValue();
+			if (p.getDescription().contains(descText)) {
+				list.add(this.newProductView(p));
+			}
+		}
+		return list;
 	}
 
 	public String buyProduct(String productId, int quantity)
 			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception {
-		// TODO
-
-
 
 
 		return null;

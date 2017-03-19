@@ -67,6 +67,10 @@ public class Supplier {
 	public Set<String> getProductsIDs() {
 		return products.keySet();
 	}
+	
+	public Map<String, Product> getProducts() {
+		return products;
+	}
 
 	public Product getProduct(String productId) {
 		return products.get(productId);
