@@ -7,6 +7,7 @@ import javax.jws.WebService;
 
 import org.komparator.supplier.domain.Product;
 import org.komparator.supplier.domain.Purchase;
+import org.komparator.supplier.domain.QuantityException;
 import org.komparator.supplier.domain.Supplier;
 
 // TODO
@@ -29,6 +30,7 @@ public class SupplierPortImpl implements SupplierPortType {
 
 	// Main operations -------------------------------------------------------
 
+	@Override
 	public ProductView getProduct(String productId) throws BadProductId_Exception {
 		// check product id
 		if (productId == null)
@@ -49,6 +51,7 @@ public class SupplierPortImpl implements SupplierPortType {
 		return null;
 	}
 
+	@Override
 	public List<ProductView> searchProducts(String descText) throws BadText_Exception {
 		// TODO
 
@@ -58,18 +61,27 @@ public class SupplierPortImpl implements SupplierPortType {
 		return null;
 	}
 
+	@Override
 	public String buyProduct(String productId, int quantity)
 			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception {
-		// TODO
-
-
-
-
-		return null;
+		String purchaseID = null;
+		if(productId == null) // check if an ID was given
+			this.throwBadProductId("Product id cannot be null!");
+		if (quantity < 0) // check if a valid quantity was given
+			this.throwBadQuantity("Invaild quantity!");
+		Supplier s = Supplier.getInstance();
+		try{
+			 purchaseID = s.buyProduct(productId, quantity);
+		}
+		catch (QuantityException e){ // might be trying to purchase to much
+			this.throwInsufficientQuantity(e.getMessage());
+		}
+		return purchaseID;
 	}
 
 	// Auxiliary operations --------------------------------------------------
 
+	@Override
 	public String ping(String name) {
 		if (name == null || name.trim().length() == 0)
 			name = "friend";
@@ -82,10 +94,12 @@ public class SupplierPortImpl implements SupplierPortType {
 		return builder.toString();
 	}
 
+	@Override
 	public void clear() {
 		Supplier.getInstance().reset();
 	}
 
+	@Override
 	public void createProduct(ProductView productToCreate) throws BadProductId_Exception, BadProduct_Exception {
 		// check null
 		if (productToCreate == null)
@@ -115,6 +129,7 @@ public class SupplierPortImpl implements SupplierPortType {
 		s.registerProduct(productId, productDesc, quantity, price);
 	}
 
+	@Override
 	public List<ProductView> listProducts() {
 		Supplier supplier = Supplier.getInstance();
 		List<ProductView> pvs = new ArrayList<ProductView>();
@@ -126,6 +141,7 @@ public class SupplierPortImpl implements SupplierPortType {
 		return pvs;
 	}
 
+	@Override
 	public List<PurchaseView> listPurchases() {
 		Supplier supplier = Supplier.getInstance();
 		List<PurchaseView> pvs = new ArrayList<PurchaseView>();
