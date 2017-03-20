@@ -59,7 +59,7 @@ public class SupplierPortImpl implements SupplierPortType {
 		descText = descText.trim();
 		if (descText.length() == 0)
 			this.throwBadText("Product description cannot be empty or whitespace!");
-		
+
 		List<ProductView> list = new ArrayList<ProductView>();
 		// retrieve product
 		Supplier supplier = Supplier.getInstance();
@@ -74,11 +74,14 @@ public class SupplierPortImpl implements SupplierPortType {
 
 	@Override
 	public String buyProduct(String productId, int quantity)
-			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception {
+			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		String purchaseID = null;
 		if(productId == null) // check if an ID was given
 			this.throwBadProductId("Product id cannot be null!");
-		if (quantity < 0) // check if a valid quantity was given
+		productId = productId.trim();
+		if (productId.length() == 0)
+			this.throwBadProductId("Product Id cannot be empty or whitespace!");
+		if (quantity <= 0) // check if a valid quantity was given
 			this.throwBadQuantity("Invaild quantity!");
 		Supplier s = Supplier.getInstance();
 		try{
