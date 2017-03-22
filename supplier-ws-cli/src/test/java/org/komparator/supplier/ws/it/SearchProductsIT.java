@@ -22,11 +22,42 @@ public class SearchProductsIT extends BaseIT {
 
 	// one-time initialization and clean-up
 	@BeforeClass
-	public static void oneTimeSetUp() {
+	public static void oneTimeSetUp() throws BadProductId_Exception, BadProduct_Exception {
+		// clear remote service state before all tests
+		client.clear();
+
+		// fill-in test products
+		// (since getProduct is read-only the initialization below
+		// can be done once for all tests in this suite)
+		{
+			ProductView product = new ProductView();
+			product.setId("X1");
+			product.setDesc("Basketball");
+			product.setPrice(10);
+			product.setQuantity(10);
+			client.createProduct(product);
+		}
+		{
+			ProductView product = new ProductView();
+			product.setId("Y2");
+			product.setDesc("Baseball");
+			product.setPrice(20);
+			product.setQuantity(20);
+			client.createProduct(product);
+		}
+		{
+			ProductView product = new ProductView();
+			product.setId("Z3");
+			product.setDesc("Soccer ball");
+			product.setPrice(30);
+			product.setQuantity(30);
+			client.createProduct(product);
+		}	
 	}
 
 	@AfterClass
 	public static void oneTimeTearDown() {
+		client.clear();
 	}
 
 	// members
@@ -48,11 +79,33 @@ public class SearchProductsIT extends BaseIT {
 
 	// bad input tests
 
-	// TODO
-
+	@Test(expected = BadText_Exception.class)
+	public void searchProductsNullIdTest() throws BadText_Exception {
+		client.searchProducts(null);
+	}
+	
+	@Test(expected = BadText_Exception.class)
+	public void searchProductsEmptyIdTest() throws BadText_Exception {
+		client.searchProducts("");
+	}
+	
+	@Test(expected = BadText_Exception.class)
+	public void searchProductsBlankIdTest() throws BadText_Exception {
+		client.searchProducts("       ");
+	}
 	
 	// main tests
-
-	// TODO
+	
+	@Test
+	public void searchProductsEmptyReturnListTest() throws BadText_Exception {
+		List<ProductView> list = client.searchProducts("Football");
+		assertEquals(list.size(),0);
+	}
+	
+	@Test
+	public void searchProductsSucessTest() throws BadText_Exception {
+		List<ProductView> list = client.searchProducts("Bas");
+		assertEquals(list.size(),2);
+	}
 
 }
