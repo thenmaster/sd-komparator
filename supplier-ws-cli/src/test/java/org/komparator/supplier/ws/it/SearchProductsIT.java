@@ -106,6 +106,8 @@ public class SearchProductsIT extends BaseIT {
 	public void searchProductsSucessTest() throws BadText_Exception {
 		List<ProductView> list = client.searchProducts("Bas");
 		assertEquals(list.size(),2);
+		for (ProductView pv : list)
+			assertTrue(pv.getDesc().contains("Bas"));
 	}
 
 }
