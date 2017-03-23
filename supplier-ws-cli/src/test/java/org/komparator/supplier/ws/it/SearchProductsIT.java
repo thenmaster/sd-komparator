@@ -94,6 +94,16 @@ public class SearchProductsIT extends BaseIT {
 		client.searchProducts("       ");
 	}
 	
+	@Test(expected = BadText_Exception.class)
+	public void searchProductsEOLidTest() throws BadText_Exception {
+		client.searchProducts("\n");
+	}
+	
+	@Test(expected = BadText_Exception.class)
+	public void searchProductsTabIdTest() throws BadText_Exception {
+		client.searchProducts("\t");
+	}
+	
 	// main tests
 	
 	@Test

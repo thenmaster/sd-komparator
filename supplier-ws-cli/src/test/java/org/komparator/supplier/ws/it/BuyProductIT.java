@@ -104,6 +104,16 @@ public class BuyProductIT extends BaseIT {
 	public void buyProductZeroQuantityTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		client.buyProduct("X1", 0);
 	}
+	
+	@Test(expected = BadProductId_Exception.class)
+	public void buyProductEOLidTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
+		client.buyProduct("\n", 2);
+	}
+	
+	@Test(expected = BadProductId_Exception.class)
+	public void buyProductTabIdTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
+		client.buyProduct("\t", 2);
+	}
 
 
 
