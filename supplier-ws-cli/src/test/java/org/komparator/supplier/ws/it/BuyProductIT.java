@@ -1,7 +1,7 @@
 package org.komparator.supplier.ws.it;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -64,11 +64,39 @@ public class BuyProductIT extends BaseIT {
 
 	// initialization and clean-up for each test
 	@Before
-	public void setUp() {
+	public void setUp() throws BadProductId_Exception, BadProduct_Exception {
+
+		client.clear(); // clear existing changes to client
+
+		{
+			ProductView product = new ProductView();
+			product.setId("X1");
+			product.setDesc("Basketball");
+			product.setPrice(10);
+			product.setQuantity(10);
+			client.createProduct(product);
+		}
+		{
+			ProductView product = new ProductView();
+			product.setId("Y2");
+			product.setDesc("Baseball");
+			product.setPrice(20);
+			product.setQuantity(20);
+			client.createProduct(product);
+		}
+		{
+			ProductView product = new ProductView();
+			product.setId("Z3");
+			product.setDesc("Soccer ball");
+			product.setPrice(30);
+			product.setQuantity(30);
+			client.createProduct(product);
+		}
 	}
 
 	@After
 	public void tearDown() {
+		client.clear();
 	}
 
 	// tests
@@ -104,12 +132,12 @@ public class BuyProductIT extends BaseIT {
 	public void buyProductZeroQuantityTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		client.buyProduct("X1", 0);
 	}
-	
+
 	@Test(expected = BadProductId_Exception.class)
 	public void buyProductEOLidTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		client.buyProduct("\n", 2);
 	}
-	
+
 	@Test(expected = BadProductId_Exception.class)
 	public void buyProductTabIdTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		client.buyProduct("\t", 2);
@@ -128,11 +156,14 @@ public class BuyProductIT extends BaseIT {
 	public void buyProductSucessPurchaseTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		 String purchaseId = client.buyProduct("Y2",15);
 		 assertEquals(client.getProduct("Y2").getQuantity(), 5);
-		 Boolean v = false;
+		 PurchaseView v = null;
 		 for(PurchaseView pv : client.listPurchases()){
-			 v |= pv.getId().equals(purchaseId);
+			if (pv.getId().equals(purchaseId))
+				v = pv;
 		 }
-		 assertTrue(v);
+		 assertNotNull(v);
+		 assertEquals("Y2",v.getProductId());
+		 assertEquals(15, v.getQuantity());
 	}
 
 }
