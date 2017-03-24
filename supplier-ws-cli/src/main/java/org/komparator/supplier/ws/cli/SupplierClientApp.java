@@ -21,22 +21,8 @@ public class SupplierClientApp {
 
 		System.out.println("Invoke ping()...");
 		String result = client.ping("client");
-		/*
-		ProductView prod = new ProductView();
-		prod.setId("123");
-		prod.setDesc("coisa");
-		prod.setQuantity(2);
-		prod.setPrice(5);
-		client.createProduct(prod);
-		ProductView data = client.getProduct("123");
-		String purchaseId = client.buyProduct("123", 2);
-		*/
 		System.out.print("Result: ");
 		System.out.println(result);
-		/*
-		System.out.println(data.getDesc());
-		System.out.println(purchaseId);
-		*/
 	}
 
 }
