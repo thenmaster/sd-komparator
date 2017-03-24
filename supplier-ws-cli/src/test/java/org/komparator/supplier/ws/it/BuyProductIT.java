@@ -20,8 +20,6 @@ import org.komparator.supplier.ws.PurchaseView;
  */
 public class BuyProductIT extends BaseIT {
 
-	// static members
-
 	// one-time initialization and clean-up
 	@BeforeClass
 	public static void oneTimeSetUp() throws BadProductId_Exception, BadProduct_Exception {
@@ -30,8 +28,6 @@ public class BuyProductIT extends BaseIT {
 	@AfterClass
 	public static void oneTimeTearDown() {
 	}
-
-	// members
 
 	// initialization and clean-up for each test
 	@Before
@@ -70,13 +66,6 @@ public class BuyProductIT extends BaseIT {
 		client.clear();
 	}
 
-	// tests
-	// assertEquals(expected, actual);
-
-	// public String buyProduct(String productId, int quantity)
-	// throws BadProductId_Exception, BadQuantity_Exception,
-	// InsufficientQuantity_Exception {
-
 	// bad input tests
 
 	@Test(expected = BadProductId_Exception.class)
@@ -94,16 +83,6 @@ public class BuyProductIT extends BaseIT {
 		client.buyProduct("      ", 2);
 	}
 
-	@Test(expected = BadQuantity_Exception.class)
-	public void buyProductNegativeQuantityTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
-		client.buyProduct("X1", -5);
-	}
-
-	@Test(expected = BadQuantity_Exception.class)
-	public void buyProductZeroQuantityTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
-		client.buyProduct("X1", 0);
-	}
-
 	@Test(expected = BadProductId_Exception.class)
 	public void buyProductEOLidTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		client.buyProduct("\n", 2);
@@ -117,6 +96,16 @@ public class BuyProductIT extends BaseIT {
 	@Test(expected = BadProductId_Exception.class)
 	public void buyProductIdDoesNotExistTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		client.buyProduct("Z2", 2);
+	}
+	
+	@Test(expected = BadQuantity_Exception.class)
+	public void buyProductNegativeQuantityTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
+		client.buyProduct("X1", -5);
+	}
+
+	@Test(expected = BadQuantity_Exception.class)
+	public void buyProductZeroQuantityTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
+		client.buyProduct("X1", 0);
 	}
 
 	@Test(expected = InsufficientQuantity_Exception.class)
