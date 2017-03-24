@@ -25,39 +25,10 @@ public class BuyProductIT extends BaseIT {
 	// one-time initialization and clean-up
 	@BeforeClass
 	public static void oneTimeSetUp() throws BadProductId_Exception, BadProduct_Exception {
-
-		client.clear(); // clear existing changes to client
-
-		{
-			ProductView product = new ProductView();
-			product.setId("X1");
-			product.setDesc("Basketball");
-			product.setPrice(10);
-			product.setQuantity(10);
-			client.createProduct(product);
-		}
-		{
-			ProductView product = new ProductView();
-			product.setId("Y2");
-			product.setDesc("Baseball");
-			product.setPrice(20);
-			product.setQuantity(20);
-			client.createProduct(product);
-		}
-		{
-			ProductView product = new ProductView();
-			product.setId("Z3");
-			product.setDesc("Soccer ball");
-			product.setPrice(30);
-			product.setQuantity(30);
-			client.createProduct(product);
-		}
-
 	}
 
 	@AfterClass
 	public static void oneTimeTearDown() {
-		client.clear();
 	}
 
 	// members
@@ -143,9 +114,10 @@ public class BuyProductIT extends BaseIT {
 		client.buyProduct("\t", 2);
 	}
 
-
-
-	// main tests
+	@Test(expected = BadProductId_Exception.class)
+	public void buyProductIdDoesNotExistTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
+		client.buyProduct("Z2", 2);
+	}
 
 	@Test(expected = InsufficientQuantity_Exception.class)
 	public void buyProductOverPurchaseTest() throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{

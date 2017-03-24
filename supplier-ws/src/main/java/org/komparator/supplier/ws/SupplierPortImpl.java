@@ -76,14 +76,16 @@ public class SupplierPortImpl implements SupplierPortType {
 	public String buyProduct(String productId, int quantity)
 			throws BadProductId_Exception, BadQuantity_Exception, InsufficientQuantity_Exception{
 		String purchaseID = null;
+		Supplier s = Supplier.getInstance();
 		if(productId == null) // check if an ID was given
 			this.throwBadProductId("Product id cannot be null!");
 		productId = productId.trim();
 		if (productId.length() == 0)
-			this.throwBadProductId("Product Id cannot be empty or whitespace!");
+			this.throwBadProductId("Product id cannot be empty or whitespace!");
+		if (!s.getProductsIDs().contains(productId))
+			this.throwBadProductId("No product exists with given id!");
 		if (quantity <= 0) // check if a valid quantity was given
 			this.throwBadQuantity("Invaild quantity!");
-		Supplier s = Supplier.getInstance();
 		try{
 			 purchaseID = s.buyProduct(productId, quantity);
 		}
