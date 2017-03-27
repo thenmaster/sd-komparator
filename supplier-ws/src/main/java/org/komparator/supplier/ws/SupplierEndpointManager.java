@@ -4,6 +4,9 @@ import java.io.IOException;
 
 import javax.xml.ws.Endpoint;
 
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
+
 
 /** End point manager */
 public class SupplierEndpointManager {
@@ -13,6 +16,10 @@ public class SupplierEndpointManager {
 
 	/** Port implementation */
 	private SupplierPortImpl portImpl = new SupplierPortImpl(this);
+
+	private UDDINaming uddiNaming = null;
+
+	private String serviceName = null;
 
 // TODO
 //	/** Obtain Port implementation */
@@ -41,6 +48,13 @@ public class SupplierEndpointManager {
 		this.wsURL = wsURL;
 	}
 
+	public SupplierEndpointManager(String uddiURL, String serviceName, String wsURL) throws UDDINamingException{
+		this.uddiNaming = new UDDINaming(uddiURL);
+		this.uddiNaming.rebind(serviceName, wsURL);
+		this.serviceName = serviceName;
+		this.wsURL = wsURL;
+	}
+
 	/* end point management */
 
 	public void start() throws Exception {
@@ -48,7 +62,7 @@ public class SupplierEndpointManager {
 			// publish end point
 			endpoint = Endpoint.create(this.portImpl);
 			if (verbose) {
-				System.out.printf("Starting %s%n", wsURL);
+				System.out.printf("Starting %s%n", this.serviceName);
 			}
 			endpoint.publish(wsURL);
 		} catch (Exception e) {
@@ -88,6 +102,15 @@ public class SupplierEndpointManager {
 			if (verbose) {
 				System.out.printf("Caught exception when stopping: %s%n", e);
 			}
+		}
+		try {
+			if (this.uddiNaming != null) {
+				// delete from UDDI
+				this.uddiNaming.unbind(this.serviceName);
+				System.out.printf("Deleted '%s' from UDDI%n", this.serviceName);
+			}
+		} catch (Exception e) {
+			System.out.printf("Caught exception when deleting: %s%n", e);
 		}
 		this.portImpl = null;
 	}
