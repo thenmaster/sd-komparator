@@ -16,6 +16,8 @@ import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.PurchaseView;
 import org.komparator.supplier.ws.SupplierPortType;
 import org.komparator.supplier.ws.SupplierService;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 
 /**
  * Client port wrapper.
@@ -41,6 +43,10 @@ public class SupplierClient implements SupplierPortType {
 	/** output option **/
 	private boolean verbose = false;
 
+	private UDDINaming uddiNaming = null;
+
+	private String serviceName = null;
+
 	public boolean isVerbose() {
 		return verbose;
 	}
@@ -52,6 +58,20 @@ public class SupplierClient implements SupplierPortType {
 	/** constructor with provided web service URL */
 	public SupplierClient(String wsURL) throws SupplierClientException {
 		this.wsURL = wsURL;
+		createStub();
+	}
+	
+	public SupplierClient(String uddiURL, String serviceName) throws UDDINamingException{
+		this.uddiNaming = new UDDINaming(uddiURL);
+		String endpointAddress = this.uddiNaming.lookup(serviceName);
+		if (endpointAddress == null) {
+			System.out.println("Not found!");
+			return;
+		} else {
+			System.out.printf("Found %s%n", endpointAddress);
+		}
+		this.serviceName = serviceName;
+		this.wsURL = endpointAddress;
 		createStub();
 	}
 

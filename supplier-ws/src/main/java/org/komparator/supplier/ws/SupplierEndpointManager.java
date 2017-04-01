@@ -50,7 +50,7 @@ public class SupplierEndpointManager {
 
 	public SupplierEndpointManager(String uddiURL, String serviceName, String wsURL) throws UDDINamingException{
 		this.uddiNaming = new UDDINaming(uddiURL);
-		this.uddiNaming.rebind(serviceName, wsURL);
+		this.uddiNaming.rebind(serviceName,wsURL);
 		this.serviceName = serviceName;
 		this.wsURL = wsURL;
 	}
