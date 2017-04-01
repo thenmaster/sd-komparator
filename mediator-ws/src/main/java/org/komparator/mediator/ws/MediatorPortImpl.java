@@ -1,10 +1,15 @@
 package org.komparator.mediator.ws;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.jws.WebService;
 
+import org.komparator.supplier.ws.BadProductId_Exception;
+import org.komparator.supplier.ws.BadText_Exception;
+import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.cli.SupplierClient;
 
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
@@ -36,8 +41,28 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	@Override
 	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
-		// TODO Auto-generated method stub
-		return null;
+		List<ItemView> list = new ArrayList<ItemView>();
+		try{
+			Collection<UDDIRecord> records = this.endpointManager.getUddiNaming().listRecords("A24_Supplier%");
+			for(UDDIRecord r : records){
+				SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), r.getOrgName());
+				ProductView p = sc.getProduct(productId);
+				ItemIdView iiv = new ItemIdView();
+				iiv.setProductId(p.getId());
+				iiv.setSupplierId(r.getOrgName());
+				ItemView iv = new ItemView();
+				iv.setDesc(p.getDesc());
+				iv.setItemId(iiv);
+				iv.setPrice(p.getPrice());
+				list.add(iv);
+			}
+			Collections.sort(list, (o1, o2) -> Integer.compare(o1.getPrice(), o2.getPrice()));
+		}catch(UDDINamingException e){
+			
+		}catch(BadProductId_Exception e){
+			throw new InvalidItemId_Exception(productId, null);
+		}
+		return list;
 	}
 
 	@Override
@@ -48,15 +73,51 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	@Override
 	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
-		// TODO Auto-generated method stub
-		return null;
+		List<ItemView> list = new ArrayList<ItemView>();
+		try{
+			Collection<UDDIRecord> records = this.endpointManager.getUddiNaming().listRecords("A24_Supplier%");
+			for(UDDIRecord r : records){
+				SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), r.getOrgName());
+				List<ProductView> l = sc.searchProducts(descText);
+				for (ProductView p : l){
+					ItemIdView iiv = new ItemIdView();
+					iiv.setProductId(p.getId());
+					iiv.setSupplierId(r.getOrgName());
+					ItemView iv = new ItemView();
+					iv.setDesc(p.getDesc());
+					iv.setItemId(iiv);
+					iv.setPrice(p.getPrice());
+					list.add(iv);
+				}
+			}
+			Collections.sort(list, (o1, o2) -> Integer.compare(o1.getPrice(), o2.getPrice()));
+		}catch(UDDINamingException e){
+			
+		}catch(BadText_Exception e){
+			throw new InvalidText_Exception(descText, null);
+		}
+		return list;
 	}
 
 	@Override
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
-		// TODO Auto-generated method stub
-		return null;
+		ShoppingResultView srv = new ShoppingResultView();
+		CartView cv = null;
+		for(CartView c : this.listCarts()){
+			if(c.getCartId().equals(cartId)){
+				cv=c;
+				break;
+			}
+		}
+		if(cv == null){
+			throw new InvalidCartId_Exception(creditCardNr, null);
+		}
+		for(CartItemView civ : cv.getItems()){
+
+		}
+
+		return srv;
 	}
 
 	@Override
