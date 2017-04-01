@@ -1,11 +1,17 @@
 package org.komparator.mediator.ws;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.jws.WebService;
 
+import org.komparator.supplier.ws.cli.SupplierClient;
+
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
+
 @WebService(
-		endpointInterface = "org.komparator.supplier.ws.MediatorPortType",
+		endpointInterface = "org.komparator.mediator.ws.MediatorPortType",
 		wsdlLocation = "mediator.wsdl",
 		name = "MediatorWebService",
 		portName = "MediatorPort",
@@ -61,9 +67,18 @@ public class MediatorPortImpl implements MediatorPortType{
 	}
 
 	@Override
-	public String ping(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public String ping(String msg) {
+		try{
+			Collection<UDDIRecord> records = this.endpointManager.getUddiNaming().listRecords("A24_Supplier%");
+			String result = "";
+			for (UDDIRecord r : records){
+				SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), r.getOrgName());
+				result += sc.ping(msg) + r.getOrgName() + "\n";
+			}
+			return result;
+		} catch(UDDINamingException e){
+			return null;
+		}
 	}
 
 	@Override

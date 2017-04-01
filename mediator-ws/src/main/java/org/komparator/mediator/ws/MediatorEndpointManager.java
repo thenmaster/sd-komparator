@@ -139,6 +139,10 @@ public class MediatorEndpointManager {
 		}
 	}
 
+	public String getUddiURL() {
+		return uddiURL;
+	}
+
 	void unpublishFromUDDI() {
 		try {
 			if (uddiNaming != null) {
