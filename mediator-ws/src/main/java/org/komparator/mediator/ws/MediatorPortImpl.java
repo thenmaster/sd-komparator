@@ -7,6 +7,9 @@ import java.util.List;
 
 import javax.jws.WebService;
 
+import org.komparator.mediator.domain.Cart;
+import org.komparator.mediator.domain.CartItem;
+import org.komparator.mediator.domain.Mediator;
 import org.komparator.supplier.ws.BadProductId_Exception;
 import org.komparator.supplier.ws.BadText_Exception;
 import org.komparator.supplier.ws.ProductView;
@@ -36,7 +39,7 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public void clear() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public class MediatorPortImpl implements MediatorPortType{
 			}
 			Collections.sort(list, (o1, o2) -> Integer.compare(o1.getPrice(), o2.getPrice()));
 		}catch(UDDINamingException e){
-			
+
 		}catch(BadProductId_Exception e){
 			throw new InvalidItemId_Exception(productId, null);
 		}
@@ -67,8 +70,14 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	@Override
 	public List<CartView> listCarts() {
-		// TODO Auto-generated method stub
-		return null;
+		Mediator m = Mediator.getInstance();
+		List<CartView> l = new ArrayList<CartView>();
+		for (String ref : m.getCartKeys()) {
+			Cart c = m.getCart(ref);
+			CartView cv = this.newCartView(c);
+			l.add(cv);
+		}
+		return l;
 	}
 
 	@Override
@@ -92,7 +101,7 @@ public class MediatorPortImpl implements MediatorPortType{
 			}
 			Collections.sort(list, (o1, o2) -> Integer.compare(o1.getPrice(), o2.getPrice()));
 		}catch(UDDINamingException e){
-			
+
 		}catch(BadText_Exception e){
 			throw new InvalidText_Exception(descText, null);
 		}
@@ -124,7 +133,7 @@ public class MediatorPortImpl implements MediatorPortType{
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -148,21 +157,40 @@ public class MediatorPortImpl implements MediatorPortType{
 		return null;
 	}
 
+	private CartView newCartView(Cart c){
+		CartView cv = new CartView();
+		cv.setCartId(c.getRefrence());
+		for (CartItem i : c.getItems()) {
+			ItemIdView id = new ItemIdView();
+			ItemView iv = new ItemView();
+			CartItemView ci = new CartItemView();
+			id.setProductId(i.getProductId());
+			id.setSupplierId(i.getSupplierId());
+			iv.setItemId(id);
+			iv.setDesc(i.getDesc());
+			iv.setPrice(i.getPrice());
+			ci.setItem(iv);
+			ci.setQuantity(i.getQuantity());
+			cv.getItems().add(ci);
+		}
+		return cv;
+	}
+
 	// Main operations -------------------------------------------------------
 
     // TODO
-	
-    
-	// Auxiliary operations --------------------------------------------------	
-	
+
+
+	// Auxiliary operations --------------------------------------------------
+
     // TODO
 
-	
+
 	// View helpers -----------------------------------------------------
-	
+
     // TODO
 
-    
+
 	// Exception helpers -----------------------------------------------------
 
     // TODO
