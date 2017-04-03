@@ -74,8 +74,7 @@ public class MediatorPortImpl implements MediatorPortType{
 		List<CartView> l = new ArrayList<CartView>();
 		for (String ref : m.getCartKeys()) {
 			Cart c = m.getCart(ref);
-			CartView cv = this.newCartView(c);
-			l.add(cv);
+			l.add(this.newCartView(c));
 		}
 		return l;
 	}
@@ -132,7 +131,24 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-		// TODO Auto-generated method stub
+		try{
+			UDDIRecord record = this.endpointManager.getUddiNaming().lookupRecord(itemId.getSupplierId());
+			SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), record.getOrgName());
+			ProductView p = sc.getProduct(itemId.getProductId());
+			if(p.getQuantity() <= itemQty){
+				Mediator m = Mediator.getInstance();
+				if(!m.cartExists(cartId)){
+					m.addCart(cartId);
+				}
+				m.getCart(cartId).addItem(new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
+			}
+
+		}
+		catch(UDDINamingException e){
+
+		} catch (BadProductId_Exception e) {
+			throw new InvalidItemId_Exception(itemId.getProductId(),null);
+		}
 
 	}
 

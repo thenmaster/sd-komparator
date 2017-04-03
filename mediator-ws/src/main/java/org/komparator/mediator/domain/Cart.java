@@ -4,20 +4,20 @@ import java.util.List;
 
 public class Cart {
 
-	private String refrence;
+	private String reference;
 
 	private List<CartItem> items;
 
 	public Cart(String reference){
-		this.refrence = reference;
+		this.reference = reference;
 	}
 
 	public String getRefrence() {
-		return refrence;
+		return reference;
 	}
 
 	public void setRefrence(String refrence) {
-		this.refrence = refrence;
+		this.reference = refrence;
 	}
 
 	public List<CartItem> getItems() {
