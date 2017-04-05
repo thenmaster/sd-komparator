@@ -1,6 +1,5 @@
 package org.komparator.supplier.ws;
 
-
 /** Main class that starts the Supplier Web Service. */
 public class SupplierApp {
 
@@ -13,7 +12,14 @@ public class SupplierApp {
 		}
 
 		// Create server implementation object
-		SupplierEndpointManager endpoint = new SupplierEndpointManager(args[0],args[1],args[2]);
+		SupplierEndpointManager endpoint = null;
+		if (args.length == 1){ // not using UDDI
+			endpoint = new SupplierEndpointManager(args[0]);
+		}
+		else if (args.length >= 3) {
+			endpoint = new SupplierEndpointManager(args[0],args[1],args[2]);
+		}
+
 		try {
 			endpoint.start();
 			endpoint.awaitConnections();

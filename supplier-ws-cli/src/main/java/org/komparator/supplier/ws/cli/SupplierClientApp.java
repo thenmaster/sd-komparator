@@ -11,8 +11,13 @@ public class SupplierClientApp {
 			return;
 		}
 
-		// Create client
-		SupplierClient client = new SupplierClient(args[0],args[1]);
+		SupplierClient client = null;
+		if (args.length == 1){ // not using UDDI
+			client = new SupplierClient(args[0]);
+		}
+		else if (args.length >= 3) {
+			client = new SupplierClient(args[0],args[1]);
+		}
 
 		// the following remote invocations are just basic examples
 		// the actual tests are made using JUnit
