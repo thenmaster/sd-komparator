@@ -10,11 +10,14 @@ import javax.jws.WebService;
 import org.komparator.mediator.domain.Cart;
 import org.komparator.mediator.domain.CartItem;
 import org.komparator.mediator.domain.Mediator;
+import org.komparator.mediator.domain.ShoppingResult;
 import org.komparator.supplier.ws.BadProductId_Exception;
 import org.komparator.supplier.ws.BadText_Exception;
 import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.cli.SupplierClient;
 
+import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClient;
+import pt.ulisboa.tecnico.sdis.ws.cli.CreditCardClientException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDIRecord;
 
@@ -110,22 +113,24 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
-		ShoppingResultView srv = new ShoppingResultView();
-		CartView cv = null;
-		for(CartView c : this.listCarts()){
-			if(c.getCartId().equals(cartId)){
-				cv=c;
-				break;
-			}
+		Mediator m = Mediator.getInstance();
+		if(m.getCart(cartId) == null){
+			throw new InvalidCartId_Exception(cartId, null);
 		}
-		if(cv == null){
-			throw new InvalidCartId_Exception(creditCardNr, null);
-		}
-		for(CartItemView civ : cv.getItems()){
-
+		CreditCardClient cc = null;
+		try {
+			cc = new CreditCardClient(this.endpointManager.getUddiURL(),"CreditCard");
+		} catch (CreditCardClientException e) {
+			throw new InvalidCreditCard_Exception("Could not connect to service", null); //null for now but we should do functions to aid in exceptions
 		}
 
-		return srv;
+		if (!cc.validateNumber(creditCardNr))
+			throw new InvalidCreditCard_Exception("Invalid credit card number", null); //null for now but we should do functions to aid in exceptions
+
+		ShoppingResult sr = m.buyCart(this.endpointManager.getUddiURL(), cartId);
+
+
+		return this.newShoppingResultView(sr);
 	}
 
 	@Override
@@ -173,23 +178,44 @@ public class MediatorPortImpl implements MediatorPortType{
 		return null;
 	}
 
+	private CartItemView newCartItemView(CartItem i){
+		ItemIdView id = new ItemIdView();
+		ItemView iv = new ItemView();
+		CartItemView ci = new CartItemView();
+		id.setProductId(i.getProductId());
+		id.setSupplierId(i.getSupplierId());
+		iv.setItemId(id);
+		iv.setDesc(i.getDesc());
+		iv.setPrice(i.getPrice());
+		ci.setItem(iv);
+		ci.setQuantity(i.getQuantity());
+		return ci;
+	}
+
 	private CartView newCartView(Cart c){
 		CartView cv = new CartView();
 		cv.setCartId(c.getRefrence());
-		for (CartItem i : c.getItems()) {
-			ItemIdView id = new ItemIdView();
-			ItemView iv = new ItemView();
-			CartItemView ci = new CartItemView();
-			id.setProductId(i.getProductId());
-			id.setSupplierId(i.getSupplierId());
-			iv.setItemId(id);
-			iv.setDesc(i.getDesc());
-			iv.setPrice(i.getPrice());
-			ci.setItem(iv);
-			ci.setQuantity(i.getQuantity());
-			cv.getItems().add(ci);
+		for (CartItem ci : c.getItems()) {
+			cv.getItems().add(this.newCartItemView(ci));
 		}
 		return cv;
+	}
+
+	private ShoppingResultView newShoppingResultView(ShoppingResult sr){
+		ShoppingResultView srv = new ShoppingResultView();
+		srv.setId(sr.getId());
+		srv.setTotalPrice(sr.getPrice());
+		for (CartItem i : sr.getPurchased()) {
+			srv.getPurchasedItems().add(this.newCartItemView(i));
+		}
+		for (CartItem i : sr.getNotPurchased()) {
+			srv.getDroppedItems().add(this.newCartItemView(i));
+		}
+		if (srv.getDroppedItems().isEmpty())
+			srv.setResult(Result.COMPLETE);
+		else
+			srv.setResult((srv.getPurchasedItems().isEmpty() ? Result.EMPTY : Result.PARTIAL));
+		return srv;
 	}
 
 	// Main operations -------------------------------------------------------

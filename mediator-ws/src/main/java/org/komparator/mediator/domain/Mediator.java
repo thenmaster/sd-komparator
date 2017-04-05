@@ -3,10 +3,22 @@ package org.komparator.mediator.domain;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.komparator.supplier.ws.BadProductId_Exception;
+import org.komparator.supplier.ws.BadQuantity_Exception;
+import org.komparator.supplier.ws.InsufficientQuantity_Exception;
+import org.komparator.supplier.ws.cli.SupplierClient;
+
+import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 
 public class Mediator {
 
 	private Map<String, Cart> carts = new ConcurrentHashMap<>();
+
+	private Map<String, ShoppingResult> purchases = new ConcurrentHashMap<>();
+
+	private AtomicInteger counter = new AtomicInteger(0); // counter for shopping
 
 	private Mediator() {
 	}
@@ -42,6 +54,29 @@ public class Mediator {
 
 	public Map<String, Cart> getCarts(){
 		return carts;
+	}
+
+	public String shoppingIdCounter(){
+		return Integer.toString(this.counter.incrementAndGet());
+	}
+
+	public ShoppingResult buyCart(String uddiUrl,String cartId){
+		Cart c = this.carts.remove(cartId);
+
+		ShoppingResult sr = new ShoppingResult(Integer.toString(this.counter.getAndIncrement()));
+		for (CartItem ci : c.getItems()) {
+			try {
+				SupplierClient sc = new SupplierClient(uddiUrl,ci.getSupplierId());
+				sc.buyProduct(ci.getProductId(), ci.getQuantity());
+				sr.addPurchased(ci);
+				sr.incPrice(ci.getPrice());
+			} catch (UDDINamingException | BadProductId_Exception | BadQuantity_Exception | InsufficientQuantity_Exception e)  {
+				sr.addNotPurchased(ci); // do something about exceptions
+			}
+		}
+
+		this.purchases.put(sr.getId(), sr);
+		return sr;
 	}
 
 
