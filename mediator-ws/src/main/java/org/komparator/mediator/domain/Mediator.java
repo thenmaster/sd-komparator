@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.komparator.mediator.ws.InvalidCartId_Exception;
 import org.komparator.supplier.ws.BadProductId_Exception;
 import org.komparator.supplier.ws.BadQuantity_Exception;
 import org.komparator.supplier.ws.InsufficientQuantity_Exception;
@@ -56,11 +57,20 @@ public class Mediator {
 		return carts;
 	}
 
+	public void addItem(String cartId,CartItem c){
+		if(!this.carts.containsKey(cartId))
+			this.addCart(cartId);
+		this.carts.get(cartId).addItem(c);
+	}
+
 	public String shoppingIdCounter(){
 		return Integer.toString(this.counter.incrementAndGet());
 	}
 
-	public ShoppingResult buyCart(String uddiUrl,String cartId){
+	public ShoppingResult buyCart(String uddiUrl,String cartId) throws InvalidCartId_Exception{
+		if(this.getCart(cartId) == null){
+			throw new InvalidCartId_Exception(cartId, null);
+		}
 		Cart c = this.carts.remove(cartId);
 
 		ShoppingResult sr = new ShoppingResult(Integer.toString(this.counter.getAndIncrement()));

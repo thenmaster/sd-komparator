@@ -17,7 +17,6 @@ import org.komparator.supplier.ws.BadProduct_Exception;
 import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.cli.SupplierClient;
 
-
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 
 public class BuyCartIT extends BaseIT{
@@ -28,7 +27,7 @@ public class BuyCartIT extends BaseIT{
 	private static final String CART_ID_1 = "CartId1";
 	private static final String SUPPLIER_ID_1 = "A24_Supplier1";
 	private static final String SUPPLIER_ID_2 = "A24_Supplier2";
-	private static final String CREDIT_CARD_NR = "ValidCreditCardNr";
+	private static final String CREDIT_CARD_NR = "4024007102923926";
 	private static final int ITEM_PRICE_1 = 10;
 	private static final int ITEM_PRICE_2 = 20;
 	private static final int ITEM_PRICE_3 = 30;
@@ -37,7 +36,7 @@ public class BuyCartIT extends BaseIT{
 	private static ItemIdView view1;
 	private static ItemIdView view2;
 	private static ItemIdView view3;
-	
+
 	@Before
 	public void setUp() throws BadProductId_Exception, BadProduct_Exception, InvalidCartId_Exception, InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
 		view1 = new ItemIdView();
@@ -49,8 +48,7 @@ public class BuyCartIT extends BaseIT{
 		view3 = new ItemIdView();
 		view3.setProductId(ITEM_ID_3);
 		view3.setSupplierId(SUPPLIER_ID_2);
-		mediatorClient.addToCart(CART_ID_1, view1, ITEM_QUANTITY);
-		
+
 		try {
 			client1 = new SupplierClient(mediatorClient.getUddiURL(), SUPPLIER_ID_1);
 			client2 = new SupplierClient(mediatorClient.getUddiURL(), SUPPLIER_ID_2);
@@ -80,7 +78,9 @@ public class BuyCartIT extends BaseIT{
 			product.setPrice(ITEM_PRICE_3);
 			product.setQuantity(ITEM_QUANTITY);
 			client2.createProduct(product);
-		}	
+		}
+
+		mediatorClient.addToCart(CART_ID_1, view1, ITEM_QUANTITY);
 	}
 
 	@Test(expected = InvalidCartId_Exception.class)
@@ -112,7 +112,7 @@ public class BuyCartIT extends BaseIT{
     public void BlankCreditCardNrTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
         mediatorClient.buyCart(CART_ID_1, "     ");
     }
-	
+
 	@Test
     public void oneItemFromOneSupplier() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception{
 		ShoppingResultView sr = mediatorClient.buyCart(CART_ID_1, CREDIT_CARD_NR);
@@ -120,7 +120,7 @@ public class BuyCartIT extends BaseIT{
 		Assert.assertEquals(1, sr.getPurchasedItems().size());
 		Assert.assertEquals(0, sr.getDroppedItems().size());
     }
-	
+
 	@Test
     public void twoItemsFromOneSupplier() throws InvalidCartId_Exception, InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception, EmptyCart_Exception, InvalidCreditCard_Exception{
 		mediatorClient.addToCart(CART_ID_1, view2, ITEM_QUANTITY);
@@ -129,7 +129,7 @@ public class BuyCartIT extends BaseIT{
 		Assert.assertEquals(2, sr.getPurchasedItems().size());
 		Assert.assertEquals(0, sr.getDroppedItems().size());
     }
-	
+
 	@Test
     public void oneItemFromEachSupplier() throws InvalidCartId_Exception, InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception, EmptyCart_Exception, InvalidCreditCard_Exception{
 		mediatorClient.addToCart(CART_ID_1, view3, ITEM_QUANTITY);
@@ -138,7 +138,7 @@ public class BuyCartIT extends BaseIT{
 		Assert.assertEquals(2, sr.getPurchasedItems().size());
 		Assert.assertEquals(0, sr.getDroppedItems().size());
     }
-	
+
 	@Test
     public void oneItemWithTooMuchQuantity() throws InvalidCartId_Exception, InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception, EmptyCart_Exception, InvalidCreditCard_Exception{
     	mediatorClient.addToCart(CART_ID_1, view1, ITEM_QUANTITY);
@@ -147,7 +147,7 @@ public class BuyCartIT extends BaseIT{
 		Assert.assertEquals(2, sr.getPurchasedItems().size());
 		Assert.assertEquals(1, sr.getDroppedItems().size());
     }
-	
+
 	@Test
     public void oneItemWithTooMuchQuantityOneOk() throws InvalidCartId_Exception, InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception, EmptyCart_Exception, InvalidCreditCard_Exception{
     	mediatorClient.addToCart(CART_ID_1, view2, ITEM_QUANTITY+1);
@@ -156,10 +156,9 @@ public class BuyCartIT extends BaseIT{
 		Assert.assertEquals(1, sr.getPurchasedItems().size());
 		Assert.assertEquals(1, sr.getDroppedItems().size());
     }
-	
+
 	@After
 	public void TearDown() {
-		client1.clear();
-		client2.clear();
+		mediatorClient.clear();
 	}
 }

@@ -30,7 +30,6 @@ public class AddToCartIT extends BaseIT{
 	private static final String CART_ID_1 = "cart";
 	private static final String SUPPLIER_ID_1 = "A24_Supplier1";
 	private static final String SUPPLIER_ID_2 = "A24_Supplier2";
-	private static final String CREDIT_CARD_NR = "ValidCreditCardNr";
 	protected static SupplierClient client;
 	protected static SupplierClient client2;
 	private static ItemIdView view1;
@@ -165,6 +164,7 @@ public class AddToCartIT extends BaseIT{
 	public void successTest() throws InvalidQuantity_Exception, InvalidCartId_Exception, InvalidItemId_Exception, NotEnoughItems_Exception {
         mediatorClient.addToCart(CART_ID_1, view1, ITEM_QUANTITY);
         List<CartView> l = mediatorClient.listCarts();
+        assertTrue(l.size() == 1);
         List<CartItemView> li = l.get(0).getItems();
         assertEquals(CART_ID_1, l.get(0).getCartId());
         assertTrue(li.size() == 1);

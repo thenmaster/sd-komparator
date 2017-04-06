@@ -129,9 +129,6 @@ public class MediatorPortImpl implements MediatorPortType{
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
 		Mediator m = Mediator.getInstance();
-		if(m.getCart(cartId) == null){
-			throw new InvalidCartId_Exception(cartId, null);
-		}
 		CreditCardClient cc = null;
 		try {
 			cc = new CreditCardClient(this.endpointManager.getUddiURL(),"CreditCard");
@@ -161,17 +158,16 @@ public class MediatorPortImpl implements MediatorPortType{
 		if (itemQty <= 0)
 			this.invalidQuantityExcpetionHelper("Invalid quantity!");
 		try{
-			UDDIRecord record = this.endpointManager.getUddiNaming().lookupRecord(itemId.getSupplierId());
-			SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), record.getOrgName());
+			SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), itemId.getSupplierId());
 			ProductView p = sc.getProduct(itemId.getProductId());
-			if(p.getQuantity() <= itemQty){
+			if (p == null)
+				this.invalidItemIdExcpetionHelper("Unknown Item!");
+			if(itemQty <= p.getQuantity()){
 				Mediator m = Mediator.getInstance();
-				if(!m.cartExists(cartId)){
-					m.addCart(cartId);
-				}
-				m.getCart(cartId).addItem(new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
+				m.addItem(cartId,new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
+				return;
 			}
-
+			this.invalidQuantityExcpetionHelper("Too much quantity asked!");
 		}
 		catch(UDDINamingException e){
 

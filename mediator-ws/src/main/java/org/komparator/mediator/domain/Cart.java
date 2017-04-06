@@ -1,12 +1,13 @@
 package org.komparator.mediator.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Cart {
 
 	private String reference;
 
-	private List<CartItem> items;
+	private List<CartItem> items = new ArrayList<CartItem>();
 
 	public Cart(String reference){
 		this.reference = reference;
@@ -25,10 +26,12 @@ public class Cart {
 	}
 
 	public void addItem(CartItem item){
-		for (CartItem cartItem : items) {
-			if (cartItem.getProductId() == item.getProductId() && cartItem.getSupplierId() == item.getSupplierId()){
-				cartItem.setQuantity(cartItem.getQuantity()+item.getQuantity());
-				return;
+		if(!this.items.isEmpty()){
+			for (CartItem cartItem : items) {
+				if (cartItem.getProductId() == item.getProductId() && cartItem.getSupplierId() == item.getSupplierId()){
+					cartItem.setQuantity(cartItem.getQuantity()+item.getQuantity());
+					return;
+				}
 			}
 		}
 		items.add(item);
