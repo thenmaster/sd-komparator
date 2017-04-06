@@ -39,21 +39,7 @@ public class MediatorPortImpl implements MediatorPortType{
 		this.endpointManager = endpointManager;
 	}
 
-	@Override
-	public void clear() {
-		try {
-			Collection<UDDIRecord> records = this.endpointManager.getUddiNaming().listRecords("A24_Supplier%");
-			for (UDDIRecord uddiRecord : records) {
-				SupplierClient s = new SupplierClient(this.endpointManager.getUddiURL(),uddiRecord.getOrgName());
-				s.clear();
-			}
-		} catch (UDDINamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Mediator.getInstance().reset();
-
-	}
+	// Main operations -------------------------------------------------------
 
 	@Override
 	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
@@ -81,17 +67,6 @@ public class MediatorPortImpl implements MediatorPortType{
 			throw new InvalidItemId_Exception(productId, null);
 		}
 		return list;
-	}
-
-	@Override
-	public List<CartView> listCarts() {
-		Mediator m = Mediator.getInstance();
-		List<CartView> l = new ArrayList<CartView>();
-		for (String ref : m.getCartKeys()) {
-			Cart c = m.getCart(ref);
-			l.add(this.newCartView(c));
-		}
-		return l;
 	}
 
 	@Override
@@ -130,14 +105,25 @@ public class MediatorPortImpl implements MediatorPortType{
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
 		Mediator m = Mediator.getInstance();
 		CreditCardClient cc = null;
+		if(cartId == null)
+			this.invalidCartIdExcpetionHelper("Null cart id!");
+		cartId = cartId.trim();
+		if (cartId.length() == 0)
+			this.invalidCartIdExcpetionHelper("Empty cart id!");
+		if(creditCardNr == null)
+			this.invalidCreditCardExcpetionHelper("Null credit card number!");
+		creditCardNr  = creditCardNr .trim();
+		if (creditCardNr.length() == 0)
+			this.invalidCreditCardExcpetionHelper("Empty credit card number!");
 		try {
-			cc = new CreditCardClient(this.endpointManager.getUddiURL(),"CreditCard");
+			cc = new CreditCardClient("http://ws.sd.rnl.tecnico.ulisboa.pt:8080/cc");
 		} catch (CreditCardClientException e) {
-			throw new InvalidCreditCard_Exception("Could not connect to service", null); //null for now but we should do functions to aid in exceptions
+			this.invalidCreditCardExcpetionHelper("Cannot connect to credit card client!");
 		}
 
-		if (!cc.validateNumber(creditCardNr))
-			throw new InvalidCreditCard_Exception("Invalid credit card number", null); //null for now but we should do functions to aid in exceptions
+		if (!cc.validateNumber(creditCardNr)){
+			this.invalidCreditCardExcpetionHelper("Invalid credit card number!");
+		}
 
 		ShoppingResult sr = m.buyCart(this.endpointManager.getUddiURL(), cartId);
 
@@ -177,6 +163,35 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	}
 
+	// Auxiliary operations --------------------------------------------------
+
+	@Override
+	public List<CartView> listCarts() {
+		Mediator m = Mediator.getInstance();
+		List<CartView> l = new ArrayList<CartView>();
+		for (String ref : m.getCartKeys()) {
+			Cart c = m.getCart(ref);
+			l.add(this.newCartView(c));
+		}
+		return l;
+	}
+
+	@Override
+	public void clear() {
+		try {
+			Collection<UDDIRecord> records = this.endpointManager.getUddiNaming().listRecords("A24_Supplier%");
+			for (UDDIRecord uddiRecord : records) {
+				SupplierClient s = new SupplierClient(this.endpointManager.getUddiURL(),uddiRecord.getOrgName());
+				s.clear();
+			}
+		} catch (UDDINamingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Mediator.getInstance().reset();
+
+	}
+
 	@Override
 	public String ping(String msg) {
 		try{
@@ -202,6 +217,8 @@ public class MediatorPortImpl implements MediatorPortType{
 		}
 		return l;
 	}
+
+	// View helpers -----------------------------------------------------
 
 	private CartItemView newCartItemView(CartItem i){
 		ItemIdView id = new ItemIdView();
@@ -243,6 +260,8 @@ public class MediatorPortImpl implements MediatorPortType{
 		return srv;
 	}
 
+	// Exception helpers -----------------------------------------------------
+
 	private void invalidCartIdExcpetionHelper(String string) throws InvalidCartId_Exception {
 		InvalidCartId i = new InvalidCartId();
 		i.setMessage(string);
@@ -261,23 +280,10 @@ public class MediatorPortImpl implements MediatorPortType{
 		throw new InvalidQuantity_Exception(string, i);
 	}
 
-	// Main operations -------------------------------------------------------
-
-    // TODO
-
-
-	// Auxiliary operations --------------------------------------------------
-
-    // TODO
-
-
-	// View helpers -----------------------------------------------------
-
-    // TODO
-
-
-	// Exception helpers -----------------------------------------------------
-
-    // TODO
+	private void invalidCreditCardExcpetionHelper(String string) throws InvalidCreditCard_Exception {
+		InvalidCreditCard i = new InvalidCreditCard();
+		i.setMessage(string);
+		throw new InvalidCreditCard_Exception(string, i);
+	}
 
 }
