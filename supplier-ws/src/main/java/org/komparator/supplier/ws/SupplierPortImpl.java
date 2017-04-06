@@ -22,6 +22,7 @@ import org.komparator.supplier.domain.Supplier;
 public class SupplierPortImpl implements SupplierPortType {
 
 	// end point manager
+	@SuppressWarnings("unused")
 	private SupplierEndpointManager endpointManager;
 
 	public SupplierPortImpl(SupplierEndpointManager endpointManager) {

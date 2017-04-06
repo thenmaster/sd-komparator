@@ -45,6 +45,7 @@ public class SupplierClient implements SupplierPortType {
 
 	private UDDINaming uddiNaming = null;
 
+	@SuppressWarnings("unused")
 	private String serviceName = null;
 
 	public boolean isVerbose() {

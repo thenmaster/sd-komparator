@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.komparator.mediator.ws.InvalidText_Exception;
 import org.komparator.mediator.ws.ItemView;
@@ -16,7 +15,6 @@ import org.komparator.supplier.ws.cli.SupplierClient;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class SearchItemsIT extends BaseIT{
