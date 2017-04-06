@@ -3,7 +3,6 @@ package org.komparator.mediator.ws;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.jws.WebService;
@@ -114,8 +113,8 @@ public class MediatorPortImpl implements MediatorPortType{
 					list.add(iv);
 				}
 			}
-			Collections.sort(list, (o1, o2) -> o1.getItemId().getProductId().compareTo(o2.getItemId().getProductId()) != 0 ? 
-											   o1.getItemId().getProductId().compareTo(o2.getItemId().getProductId()) : 
+			Collections.sort(list, (o1, o2) -> o1.getItemId().getProductId().compareTo(o2.getItemId().getProductId()) != 0 ?
+											   o1.getItemId().getProductId().compareTo(o2.getItemId().getProductId()) :
 											   Integer.compare(o1.getPrice(), o2.getPrice()));
 
 		}catch(UDDINamingException e){
@@ -152,6 +151,15 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+		if(cartId == null)
+			this.invalidCartIdExcpetionHelper("Null cart id!");
+		cartId = cartId.trim();
+		if (cartId.length() == 0)
+			this.invalidCartIdExcpetionHelper("Empty cart id!");
+		if (itemId == null)
+			this.invalidItemIdExcpetionHelper("Null item id!");
+		if (itemQty <= 0)
+			this.invalidQuantityExcpetionHelper("Invalid quantity!");
 		try{
 			UDDIRecord record = this.endpointManager.getUddiNaming().lookupRecord(itemId.getSupplierId());
 			SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), record.getOrgName());
@@ -168,7 +176,7 @@ public class MediatorPortImpl implements MediatorPortType{
 		catch(UDDINamingException e){
 
 		} catch (BadProductId_Exception e) {
-			throw new InvalidItemId_Exception(itemId.getProductId(),null);
+			this.invalidItemIdExcpetionHelper("Invalid product id!");
 		}
 
 	}
@@ -237,6 +245,24 @@ public class MediatorPortImpl implements MediatorPortType{
 		else
 			srv.setResult((srv.getPurchasedItems().isEmpty() ? Result.EMPTY : Result.PARTIAL));
 		return srv;
+	}
+
+	private void invalidCartIdExcpetionHelper(String string) throws InvalidCartId_Exception {
+		InvalidCartId i = new InvalidCartId();
+		i.setMessage(string);
+		throw new InvalidCartId_Exception(string, i);
+	}
+
+	private void invalidItemIdExcpetionHelper(String string) throws InvalidItemId_Exception {
+		InvalidItemId i = new InvalidItemId();
+		i.setMessage(string);
+		throw new InvalidItemId_Exception(string, i);
+	}
+
+	private void invalidQuantityExcpetionHelper(String string) throws InvalidQuantity_Exception {
+		InvalidQuantity i = new InvalidQuantity();
+		i.setMessage(string);
+		throw new InvalidQuantity_Exception(string, i);
 	}
 
 	// Main operations -------------------------------------------------------
