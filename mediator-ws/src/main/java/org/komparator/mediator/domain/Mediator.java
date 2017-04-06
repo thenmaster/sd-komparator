@@ -40,8 +40,8 @@ public class Mediator {
 		return carts.containsKey(reference);
 	}
 
-	public void addCart(String refrence){
-		carts.put(refrence, new Cart(refrence));
+	public void addCart(String reference){
+		carts.put(reference, new Cart(reference));
 	}
 
 	public Set<String> getCartKeys(){

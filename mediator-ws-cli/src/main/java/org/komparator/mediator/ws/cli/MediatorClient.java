@@ -53,6 +53,10 @@ public class MediatorClient implements MediatorPortType {
     public String getWsURL() {
         return wsURL;
     }
+    
+    public String getUddiURL() {
+        return uddiURL;
+    }
 
     /** output option **/
     private boolean verbose = false;

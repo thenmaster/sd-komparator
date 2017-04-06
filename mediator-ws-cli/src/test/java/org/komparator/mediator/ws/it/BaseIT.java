@@ -13,7 +13,7 @@ public class BaseIT {
 	protected static Properties testProps;
 
 	protected static MediatorClient mediatorClient;
-
+	
 	@BeforeClass
 	public static void oneTimeSetup() throws Exception {
 		testProps = new Properties();
