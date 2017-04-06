@@ -25,6 +25,12 @@ public class Cart {
 	}
 
 	public void addItem(CartItem item){
+		for (CartItem cartItem : items) {
+			if (cartItem.getProductId() == item.getProductId() && cartItem.getSupplierId() == item.getSupplierId()){
+				cartItem.setQuantity(cartItem.getQuantity()+item.getQuantity());
+				return;
+			}
+		}
 		items.add(item);
 	}
 
@@ -35,5 +41,6 @@ public class Cart {
 		}
 		return null;
 	}
+
 
 }

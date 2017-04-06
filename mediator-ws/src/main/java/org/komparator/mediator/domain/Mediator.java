@@ -79,5 +79,10 @@ public class Mediator {
 		return sr;
 	}
 
+	public void reset(){
+		this.carts.clear();
+		this.purchases.clear();
+		this.counter.set(0);
+	}
 
 }

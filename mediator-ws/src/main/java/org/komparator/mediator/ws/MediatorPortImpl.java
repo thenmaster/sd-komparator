@@ -41,7 +41,17 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
+		try {
+			Collection<UDDIRecord> records = this.endpointManager.getUddiNaming().listRecords("A24_Supplier%");
+			for (UDDIRecord uddiRecord : records) {
+				SupplierClient s = new SupplierClient(this.endpointManager.getUddiURL(),uddiRecord.getOrgName());
+				s.clear();
+			}
+		} catch (UDDINamingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Mediator.getInstance().reset();
 
 	}
 
