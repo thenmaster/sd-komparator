@@ -3,6 +3,7 @@ package org.komparator.mediator.ws;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.jws.WebService;
@@ -63,14 +64,16 @@ public class MediatorPortImpl implements MediatorPortType{
 			for(UDDIRecord r : records){
 				SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), r.getOrgName());
 				ProductView p = sc.getProduct(productId);
-				ItemIdView iiv = new ItemIdView();
-				iiv.setProductId(p.getId());
-				iiv.setSupplierId(r.getOrgName());
-				ItemView iv = new ItemView();
-				iv.setDesc(p.getDesc());
-				iv.setItemId(iiv);
-				iv.setPrice(p.getPrice());
-				list.add(iv);
+				if (p != null){
+					ItemIdView iiv = new ItemIdView();
+					iiv.setProductId(p.getId());
+					iiv.setSupplierId(r.getOrgName());
+					ItemView iv = new ItemView();
+					iv.setDesc(p.getDesc());
+					iv.setItemId(iiv);
+					iv.setPrice(p.getPrice());
+					list.add(iv);
+				}
 			}
 			Collections.sort(list, (o1, o2) -> Integer.compare(o1.getPrice(), o2.getPrice()));
 		}catch(UDDINamingException e){
@@ -111,7 +114,10 @@ public class MediatorPortImpl implements MediatorPortType{
 					list.add(iv);
 				}
 			}
-			Collections.sort(list, (o1, o2) -> Integer.compare(o1.getPrice(), o2.getPrice()));
+			Collections.sort(list, (o1, o2) -> o1.getItemId().getProductId().compareTo(o2.getItemId().getProductId()) != 0 ? 
+											   o1.getItemId().getProductId().compareTo(o2.getItemId().getProductId()) : 
+											   Integer.compare(o1.getPrice(), o2.getPrice()));
+
 		}catch(UDDINamingException e){
 
 		}catch(BadText_Exception e){
