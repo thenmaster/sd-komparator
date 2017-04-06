@@ -184,8 +184,13 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	@Override
 	public List<ShoppingResultView> shopHistory() {
-		// TODO Auto-generated method stub
-		return null;
+		Mediator m = Mediator.getInstance();
+		List<ShoppingResultView> l = new ArrayList<ShoppingResultView>();
+		for (String s : m.getShoppingResultKeys()) {
+			ShoppingResult sr = m.getShoppingResult(s);
+			l.add(this.newShoppingResultView(sr));
+		}
+		return l;
 	}
 
 	private CartItemView newCartItemView(CartItem i){

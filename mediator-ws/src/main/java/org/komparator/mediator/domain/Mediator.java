@@ -79,6 +79,14 @@ public class Mediator {
 		return sr;
 	}
 
+	public ShoppingResult getShoppingResult(String id){
+		return purchases.get(id);
+	}
+
+	public Set<String> getShoppingResultKeys(){
+		return purchases.keySet();
+	}
+
 	public void reset(){
 		this.carts.clear();
 		this.purchases.clear();
