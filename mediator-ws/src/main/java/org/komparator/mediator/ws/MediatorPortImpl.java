@@ -106,23 +106,23 @@ public class MediatorPortImpl implements MediatorPortType{
 		Mediator m = Mediator.getInstance();
 		CreditCardClient cc = null;
 		if(cartId == null)
-			this.invalidCartIdExcpetionHelper("Null cart id!");
+			this.invalidCartIdExceptionHelper("Null cart id!");
 		cartId = cartId.trim();
 		if (cartId.length() == 0)
-			this.invalidCartIdExcpetionHelper("Empty cart id!");
+			this.invalidCartIdExceptionHelper("Empty cart id!");
 		if(creditCardNr == null)
-			this.invalidCreditCardExcpetionHelper("Null credit card number!");
+			this.invalidCreditCardExceptionHelper("Null credit card number!");
 		creditCardNr  = creditCardNr .trim();
 		if (creditCardNr.length() == 0)
-			this.invalidCreditCardExcpetionHelper("Empty credit card number!");
+			this.invalidCreditCardExceptionHelper("Empty credit card number!");
 		try {
 			cc = new CreditCardClient("http://ws.sd.rnl.tecnico.ulisboa.pt:8080/cc");
 		} catch (CreditCardClientException e) {
-			this.invalidCreditCardExcpetionHelper("Cannot connect to credit card client!");
+			this.invalidCreditCardExceptionHelper("Cannot connect to credit card client!");
 		}
 
 		if (!cc.validateNumber(creditCardNr)){
-			this.invalidCreditCardExcpetionHelper("Invalid credit card number!");
+			this.invalidCreditCardExceptionHelper("Invalid credit card number!");
 		}
 
 		ShoppingResult sr = m.buyCart(this.endpointManager.getUddiURL(), cartId);
@@ -136,19 +136,19 @@ public class MediatorPortImpl implements MediatorPortType{
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
 		Mediator m = Mediator.getInstance();
 		if(cartId == null)
-			this.invalidCartIdExcpetionHelper("Null cart id!");
+			this.invalidCartIdExceptionHelper("Null cart id!");
 		cartId = cartId.trim();
 		if (cartId.length() == 0)
-			this.invalidCartIdExcpetionHelper("Empty cart id!");
+			this.invalidCartIdExceptionHelper("Empty cart id!");
 		if (itemId == null)
-			this.invalidItemIdExcpetionHelper("Null item id!");
+			this.invalidItemIdExceptionHelper("Null item id!");
 		if (itemQty <= 0)
-			this.invalidQuantityExcpetionHelper("Invalid quantity!");
+			this.invalidQuantityExceptionHelper("Invalid quantity!");
 		try{
 			SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), itemId.getSupplierId());
 			ProductView p = sc.getProduct(itemId.getProductId());
 			if (p == null){
-				this.invalidItemIdExcpetionHelper("Unknown Item!");
+				this.invalidItemIdExceptionHelper("Unknown Item!");
 				return;
 			}
 			int initialQuantity = 0;
@@ -158,12 +158,12 @@ public class MediatorPortImpl implements MediatorPortType{
 				m.addItem(cartId,new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
 				return;
 			}
-			this.invalidQuantityExcpetionHelper("Too much quantity asked!");
+			this.invalidQuantityExceptionHelper("Too much quantity asked!");
 		}
 		catch(UDDINamingException e){
 
 		} catch (BadProductId_Exception e) {
-			this.invalidItemIdExcpetionHelper("Invalid product id!");
+			this.invalidItemIdExceptionHelper("Invalid product id!");
 		}
 
 	}
@@ -267,25 +267,25 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	// Exception helpers -----------------------------------------------------
 
-	private void invalidCartIdExcpetionHelper(String string) throws InvalidCartId_Exception {
+	private void invalidCartIdExceptionHelper(String string) throws InvalidCartId_Exception {
 		InvalidCartId i = new InvalidCartId();
 		i.setMessage(string);
 		throw new InvalidCartId_Exception(string, i);
 	}
 
-	private void invalidItemIdExcpetionHelper(String string) throws InvalidItemId_Exception {
+	private void invalidItemIdExceptionHelper(String string) throws InvalidItemId_Exception {
 		InvalidItemId i = new InvalidItemId();
 		i.setMessage(string);
 		throw new InvalidItemId_Exception(string, i);
 	}
 
-	private void invalidQuantityExcpetionHelper(String string) throws InvalidQuantity_Exception {
+	private void invalidQuantityExceptionHelper(String string) throws InvalidQuantity_Exception {
 		InvalidQuantity i = new InvalidQuantity();
 		i.setMessage(string);
 		throw new InvalidQuantity_Exception(string, i);
 	}
 
-	private void invalidCreditCardExcpetionHelper(String string) throws InvalidCreditCard_Exception {
+	private void invalidCreditCardExceptionHelper(String string) throws InvalidCreditCard_Exception {
 		InvalidCreditCard i = new InvalidCreditCard();
 		i.setMessage(string);
 		throw new InvalidCreditCard_Exception(string, i);
