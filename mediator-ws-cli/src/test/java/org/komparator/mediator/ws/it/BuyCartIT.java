@@ -16,6 +16,7 @@ import org.komparator.mediator.ws.InvalidItemId_Exception;
 import org.komparator.mediator.ws.InvalidQuantity_Exception;
 import org.komparator.mediator.ws.ItemIdView;
 import org.komparator.mediator.ws.NotEnoughItems_Exception;
+import org.komparator.mediator.ws.Result;
 import org.komparator.mediator.ws.ShoppingResultView;
 import org.komparator.supplier.ws.BadProductId_Exception;
 import org.komparator.supplier.ws.BadProduct_Exception;
@@ -156,6 +157,7 @@ public class BuyCartIT extends BaseIT{
         assertEquals(ITEM_ID_1,cv1.getItem().getItemId().getProductId());
         assertEquals(SUPPLIER_ID_1,cv1.getItem().getItemId().getSupplierId());
 		assertEquals(ITEM_PRICE_1*ITEM_QUANTITY, sr.getTotalPrice());
+		assertEquals(Result.COMPLETE,sr.getResult());
 		assertEquals(0, sr.getDroppedItems().size());
     }
 
@@ -183,6 +185,7 @@ public class BuyCartIT extends BaseIT{
         assertEquals(SUPPLIER_ID_1,cv0.getItem().getItemId().getSupplierId());
 
         assertEquals(ITEM_PRICE_1*ITEM_QUANTITY + ITEM_PRICE_2*ITEM_QUANTITY, sr.getTotalPrice());
+        assertEquals(Result.COMPLETE,sr.getResult());
 		assertEquals(0, sr.getDroppedItems().size());
     }
 
@@ -209,6 +212,7 @@ public class BuyCartIT extends BaseIT{
         assertEquals(SUPPLIER_ID_2,cv0.getItem().getItemId().getSupplierId());
 
 		assertEquals(ITEM_PRICE_1*ITEM_QUANTITY + ITEM_PRICE_3*ITEM_QUANTITY, sr.getTotalPrice());
+		assertEquals(Result.COMPLETE,sr.getResult());
 		assertEquals(0, sr.getDroppedItems().size());
     }
 
@@ -228,6 +232,7 @@ public class BuyCartIT extends BaseIT{
         assertEquals(ITEM_ID_1,cv1.getItem().getItemId().getProductId());
         assertEquals(SUPPLIER_ID_1,cv1.getItem().getItemId().getSupplierId());
 		assertEquals(0, sr.getTotalPrice());
+		assertEquals(Result.EMPTY,sr.getResult());
 		assertEquals(0, sr.getPurchasedItems().size());
     }
 
@@ -256,6 +261,7 @@ public class BuyCartIT extends BaseIT{
         assertEquals(ITEM_ID_2,cv1.getItem().getItemId().getProductId());
         assertEquals(SUPPLIER_ID_1,cv1.getItem().getItemId().getSupplierId());
 		assertEquals(ITEM_PRICE_2*ITEM_QUANTITY, sr.getTotalPrice());
+		assertEquals(Result.PARTIAL,sr.getResult());
     }
 
 	@After

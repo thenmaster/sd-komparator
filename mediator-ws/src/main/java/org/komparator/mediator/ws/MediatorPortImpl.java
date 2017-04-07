@@ -267,37 +267,37 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	// Exception helpers -----------------------------------------------------
 
-	private void invalidCartIdExceptionHelper(String string) throws InvalidCartId_Exception {
+	private void invalidCartIdExceptionHelper(final String string) throws InvalidCartId_Exception {
 		InvalidCartId i = new InvalidCartId();
 		i.setMessage(string);
 		throw new InvalidCartId_Exception(string, i);
 	}
 
-	private void invalidItemIdExceptionHelper(String string) throws InvalidItemId_Exception {
+	private void invalidItemIdExceptionHelper(final String string) throws InvalidItemId_Exception {
 		InvalidItemId i = new InvalidItemId();
 		i.setMessage(string);
 		throw new InvalidItemId_Exception(string, i);
 	}
 
-	private void invalidQuantityExceptionHelper(String string) throws InvalidQuantity_Exception {
+	private void invalidQuantityExceptionHelper(final String string) throws InvalidQuantity_Exception {
 		InvalidQuantity i = new InvalidQuantity();
 		i.setMessage(string);
 		throw new InvalidQuantity_Exception(string, i);
 	}
 
-	private void invalidCreditCardExceptionHelper(String string) throws InvalidCreditCard_Exception {
+	private void invalidCreditCardExceptionHelper(final String string) throws InvalidCreditCard_Exception {
 		InvalidCreditCard i = new InvalidCreditCard();
 		i.setMessage(string);
 		throw new InvalidCreditCard_Exception(string, i);
 	}
 
-	private void notEnoughItemsExceptionHelper(String string) throws NotEnoughItems_Exception {
+	private void notEnoughItemsExceptionHelper(final String string) throws NotEnoughItems_Exception {
 		NotEnoughItems i = new NotEnoughItems();
 		i.setMessage(string);
 		throw new NotEnoughItems_Exception(string, i);
 	}
 
-	private void invalidTextExceptionHelper(String string) throws InvalidText_Exception {
+	private void invalidTextExceptionHelper(final String string) throws InvalidText_Exception {
 		InvalidText i = new InvalidText();
 		i.setMessage(string);
 		throw new InvalidText_Exception(string, i);
