@@ -180,8 +180,8 @@ public class AddToCartIT extends BaseIT{
         assertEquals(CART_ID_1, l.get(0).getCartId());
         List<CartItemView> li = l.get(0).getItems();
         assertEquals(2, li.size());
-        CartItemView cv1 = li.get(1);
-        CartItemView cv0 = li.get(0);
+        CartItemView cv1 = li.get(0);
+        CartItemView cv0 = li.get(1);
         assertEquals(ITEM_QUANTITY,cv1.getQuantity());
         assertEquals(ITEM_PRICE_1,cv1.getItem().getPrice());
         assertEquals(ITEM_DESC_1,cv1.getItem().getDesc());
@@ -207,16 +207,16 @@ public class AddToCartIT extends BaseIT{
         assertEquals(2, li.size());
         CartItemView cv1 = li.get(1);
         CartItemView cv0 = li.get(0);
-        assertEquals(ITEM_QUANTITY,cv1.getQuantity());
-        assertEquals(ITEM_PRICE_1,cv1.getItem().getPrice());
-        assertEquals(ITEM_DESC_1,cv1.getItem().getDesc());
-        assertEquals(ITEM_ID_1,cv1.getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_1,cv1.getItem().getItemId().getSupplierId());
         assertEquals(ITEM_QUANTITY,cv0.getQuantity());
-        assertEquals(ITEM_PRICE_3,cv0.getItem().getPrice());
-        assertEquals(ITEM_DESC_3,cv0.getItem().getDesc());
-        assertEquals(ITEM_ID_3,cv0.getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_2,cv0.getItem().getItemId().getSupplierId());
+        assertEquals(ITEM_PRICE_1,cv0.getItem().getPrice());
+        assertEquals(ITEM_DESC_1,cv0.getItem().getDesc());
+        assertEquals(ITEM_ID_1,cv0.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_1,cv0.getItem().getItemId().getSupplierId());
+        assertEquals(ITEM_QUANTITY,cv1.getQuantity());
+        assertEquals(ITEM_PRICE_3,cv1.getItem().getPrice());
+        assertEquals(ITEM_DESC_3,cv1.getItem().getDesc());
+        assertEquals(ITEM_ID_3,cv1.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_2,cv1.getItem().getItemId().getSupplierId());
     }
 	
 	@Test
@@ -225,19 +225,29 @@ public class AddToCartIT extends BaseIT{
 		mediatorClient.addToCart(CART_ID_2, view2, ITEM_QUANTITY);
         List<CartView> l = mediatorClient.listCarts();
         assertEquals(2, l.size());
-        List<CartItemView> li = l.get(1).getItems();
-        assertEquals(1, li.size());
-        CartItemView cv1 = li.get(0);
+        CartView l0 = l.get(0);
+        CartView l1 = l.get(1);
+
+        if(CART_ID_1 != l0.getCartId()){
+        	CartView temp = l1;
+        	l1 = l0;
+        	l0 = temp;
+        }
+        
+        assertEquals(CART_ID_2, l1.getCartId());
+        assertEquals(CART_ID_1, l0.getCartId());
+        
+        assertEquals(1, l0.getItems().size());
+        CartItemView cv1 = l0.getItems().get(0);
         assertEquals(ITEM_QUANTITY,cv1.getQuantity());
         assertEquals(ITEM_PRICE_1,cv1.getItem().getPrice());
         assertEquals(ITEM_DESC_1,cv1.getItem().getDesc());
         assertEquals(ITEM_ID_1,cv1.getItem().getItemId().getProductId());
         assertEquals(SUPPLIER_ID_1,cv1.getItem().getItemId().getSupplierId());
-        assertEquals(CART_ID_2, l.get(0).getCartId());
-        assertEquals(CART_ID_1, l.get(1).getCartId());
-        li = l.get(1).getItems();
-        assertEquals(1, li.size());
-        cv1 = li.get(0);
+
+
+        assertEquals(1, l1.getItems().size());
+        cv1 = l1.getItems().get(0);
         assertEquals(ITEM_QUANTITY,cv1.getQuantity());
         assertEquals(ITEM_PRICE_2,cv1.getItem().getPrice());
         assertEquals(ITEM_DESC_2,cv1.getItem().getDesc());

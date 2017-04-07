@@ -167,8 +167,8 @@ public class BuyCartIT extends BaseIT{
         assertEquals(0, l.size());
         List<CartItemView> li = sr.getPurchasedItems();
         assertEquals(2, li.size());
-        CartItemView cv1 = li.get(1);
-        CartItemView cv0 = li.get(0);
+        CartItemView cv1 = li.get(0);
+        CartItemView cv0 = li.get(1);
 
         assertEquals(ITEM_QUANTITY,cv1.getQuantity());
         assertEquals(ITEM_PRICE_1,cv1.getItem().getPrice());
@@ -194,8 +194,8 @@ public class BuyCartIT extends BaseIT{
         assertEquals(0, l.size());
         List<CartItemView> li = sr.getPurchasedItems();
         assertEquals(2, li.size());
-        CartItemView cv1 = li.get(1);
-        CartItemView cv0 = li.get(0);
+        CartItemView cv1 = li.get(0);
+        CartItemView cv0 = li.get(1);
         assertEquals(ITEM_QUANTITY,cv1.getQuantity());
         assertEquals(ITEM_PRICE_1,cv1.getItem().getPrice());
         assertEquals(ITEM_DESC_1,cv1.getItem().getDesc());
