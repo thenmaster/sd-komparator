@@ -62,9 +62,9 @@ public class MediatorPortImpl implements MediatorPortType{
 			}
 			Collections.sort(list, (o1, o2) -> Integer.compare(o1.getPrice(), o2.getPrice()));
 		}catch(UDDINamingException e){
-
+			this.invalidItemIdExceptionHelper("Failed to connect to suplier!");
 		}catch(BadProductId_Exception e){
-			throw new InvalidItemId_Exception(productId, null);
+			this.invalidItemIdExceptionHelper("Invalid item id!");
 		}
 		return list;
 	}
@@ -93,9 +93,9 @@ public class MediatorPortImpl implements MediatorPortType{
 											   Integer.compare(o1.getPrice(), o2.getPrice()));
 
 		}catch(UDDINamingException e){
-
+			this.invalidTextExceptionHelper("Failed to connect to suplier!");
 		}catch(BadText_Exception e){
-			throw new InvalidText_Exception(descText, null);
+			this.invalidTextExceptionHelper("Invalid item description!");
 		}
 		return list;
 	}
@@ -162,7 +162,7 @@ public class MediatorPortImpl implements MediatorPortType{
 			this.notEnoughItemsExceptionHelper("Too much quantity asked!");
 		}
 		catch(UDDINamingException e){
-
+			this.invalidItemIdExceptionHelper("Falied to connect to supplier!");
 		} catch (BadProductId_Exception e) {
 			this.invalidItemIdExceptionHelper("Invalid product id!");
 		}
@@ -191,7 +191,7 @@ public class MediatorPortImpl implements MediatorPortType{
 				s.clear();
 			}
 		} catch (UDDINamingException e) {
-			
+			//do nothing
 		}
 		Mediator.getInstance().reset();
 
@@ -208,7 +208,7 @@ public class MediatorPortImpl implements MediatorPortType{
 			}
 			return result;
 		} catch(UDDINamingException e){
-			return null;
+			return "Falied to connect to service";
 		}
 	}
 
@@ -295,6 +295,12 @@ public class MediatorPortImpl implements MediatorPortType{
 		NotEnoughItems i = new NotEnoughItems();
 		i.setMessage(string);
 		throw new NotEnoughItems_Exception(string, i);
+	}
+
+	private void invalidTextExceptionHelper(String string) throws InvalidText_Exception {
+		InvalidText i = new InvalidText();
+		i.setMessage(string);
+		throw new InvalidText_Exception(string, i);
 	}
 
 }
