@@ -97,6 +97,16 @@ public class BuyCartIT extends BaseIT{
     public void BlankCartIdTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
         mediatorClient.buyCart("    ", CREDIT_CARD_NR);
     }
+	
+	@Test(expected = InvalidCartId_Exception.class)
+    public void NewLineCartIdTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
+        mediatorClient.buyCart("\n", CREDIT_CARD_NR);
+    }
+	
+	@Test(expected = InvalidCartId_Exception.class)
+    public void TabCartIdTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
+        mediatorClient.buyCart("\t", CREDIT_CARD_NR);
+    }
 
 	@Test(expected = InvalidCreditCard_Exception.class)
     public void NullCreditCardNrTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
@@ -111,6 +121,16 @@ public class BuyCartIT extends BaseIT{
 	@Test(expected = InvalidCreditCard_Exception.class)
     public void BlankCreditCardNrTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
         mediatorClient.buyCart(CART_ID_1, "     ");
+    }
+	
+	@Test(expected = InvalidCreditCard_Exception.class)
+    public void NewLineCreditCardNrTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
+        mediatorClient.buyCart(CART_ID_1, "\n");
+    }
+	
+	@Test(expected = InvalidCreditCard_Exception.class)
+    public void TabCreditCardNrTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
+        mediatorClient.buyCart(CART_ID_1, "\t");
     }
 
 	@Test
