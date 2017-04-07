@@ -19,7 +19,7 @@ public class Mediator {
 
 	private Map<String, ShoppingResult> purchases = new ConcurrentHashMap<>();
 
-	private AtomicInteger counter = new AtomicInteger(0); // counter for shopping
+	private AtomicInteger counter = new AtomicInteger(1); // counter for shopping
 
 	private Mediator() {
 	}
@@ -63,10 +63,6 @@ public class Mediator {
 		this.carts.get(cartId).addItem(c);
 	}
 
-	public String shoppingIdCounter(){
-		return Integer.toString(this.counter.incrementAndGet());
-	}
-
 	public ShoppingResult buyCart(String uddiUrl,String cartId) throws InvalidCartId_Exception{
 		if(this.getCart(cartId) == null){
 			throw new InvalidCartId_Exception(cartId, null);
@@ -100,7 +96,7 @@ public class Mediator {
 	public void reset(){
 		this.carts.clear();
 		this.purchases.clear();
-		this.counter.set(0);
+		this.counter.set(1);
 	}
 
 }
