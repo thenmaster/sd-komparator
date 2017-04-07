@@ -149,7 +149,6 @@ public class MediatorPortImpl implements MediatorPortType{
 			ProductView p = sc.getProduct(itemId.getProductId());
 			if (p == null){
 				this.invalidItemIdExceptionHelper("Unknown Item!");
-				return;
 			}
 			int initialQuantity = 0;
 			if(m.getCart(cartId).getItem(itemId.getProductId()) != null)
@@ -158,7 +157,7 @@ public class MediatorPortImpl implements MediatorPortType{
 				m.addItem(cartId,new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
 				return;
 			}
-			this.invalidQuantityExceptionHelper("Too much quantity asked!");
+			this.notEnoughItemsExceptionHelper("Too much quantity asked!");
 		}
 		catch(UDDINamingException e){
 
@@ -289,6 +288,12 @@ public class MediatorPortImpl implements MediatorPortType{
 		InvalidCreditCard i = new InvalidCreditCard();
 		i.setMessage(string);
 		throw new InvalidCreditCard_Exception(string, i);
+	}
+
+	private void notEnoughItemsExceptionHelper(String string) throws NotEnoughItems_Exception {
+		NotEnoughItems i = new NotEnoughItems();
+		i.setMessage(string);
+		throw new NotEnoughItems_Exception(string, i);
 	}
 
 }
