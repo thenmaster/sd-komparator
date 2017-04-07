@@ -154,10 +154,6 @@ public class AddToCartIT extends BaseIT{
     public void TooMuchQuantityTest() throws InvalidCartId_Exception, InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
     	mediatorClient.addToCart(CART_ID_1, view1, ITEM_QUANTITY+1);
     }
-	
-	CartItemView swap(CartItemView a, CartItemView b) {  // usage: y = swap(x, x=y);
-		return a;
-	}
 
 	@Test
 	public void oneItemFromOneSupplier() throws InvalidCartId_Exception, InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
@@ -187,7 +183,9 @@ public class AddToCartIT extends BaseIT{
         CartItemView cv0 = li.get(0);
         CartItemView cv1 = li.get(1);
         if(ITEM_ID_1 != cv0.getItem().getItemId().getProductId()){
-			cv0 = swap(cv1, cv1=cv0); 
+        	CartItemView temp = li.get(1);
+        	cv1 = cv0;
+        	cv0 = temp;
         }
         assertEquals(ITEM_QUANTITY,cv0.getQuantity());
         assertEquals(ITEM_PRICE_1,cv0.getItem().getPrice());
@@ -216,7 +214,9 @@ public class AddToCartIT extends BaseIT{
         CartItemView cv1 = li.get(1);
         
         if(ITEM_ID_1 != cv0.getItem().getItemId().getProductId()){
-			cv0 = swap(cv1, cv1=cv0); 
+        	CartItemView temp = li.get(1);
+        	cv1 = cv0;
+        	cv0 = temp;
         }
         assertEquals(ITEM_QUANTITY,cv0.getQuantity());
         assertEquals(ITEM_PRICE_1,cv0.getItem().getPrice());
