@@ -42,7 +42,7 @@ public class ShoppingResult {
 	}
 
 	public void addNotPurchased(CartItem notPurchased) {
-		this.purchased.add(notPurchased);
+		this.notPurchased.add(notPurchased);
 	}
 
 }
