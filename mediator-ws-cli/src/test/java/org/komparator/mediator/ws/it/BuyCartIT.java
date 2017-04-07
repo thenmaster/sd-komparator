@@ -142,6 +142,10 @@ public class BuyCartIT extends BaseIT{
     public void TabCreditCardNrTest() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
         mediatorClient.buyCart(CART_ID_1, "\t");
     }
+	
+	CartItemView swap(CartItemView a, CartItemView b) {  // usage: y = swap(x, x=y);
+		return a;
+	}
 
 	@Test
     public void oneItemFromOneSupplier() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception{
@@ -150,11 +154,12 @@ public class BuyCartIT extends BaseIT{
         assertEquals(0, l.size());
         List<CartItemView> li = sr.getPurchasedItems();
         assertEquals(1, li.size());
-        assertEquals(ITEM_QUANTITY,li.get(0).getQuantity());
-        assertEquals(ITEM_PRICE_1,li.get(0).getItem().getPrice());
-        assertEquals(ITEM_DESC_1,li.get(0).getItem().getDesc());
-        assertEquals(ITEM_ID_1,li.get(0).getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_1,li.get(0).getItem().getItemId().getSupplierId());
+        CartItemView cv0 = li.get(0);
+        assertEquals(ITEM_QUANTITY,cv0.getQuantity());
+        assertEquals(ITEM_PRICE_1,cv0.getItem().getPrice());
+        assertEquals(ITEM_DESC_1,cv0.getItem().getDesc());
+        assertEquals(ITEM_ID_1,cv0.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_1,cv0.getItem().getItemId().getSupplierId());
 		Assert.assertEquals(ITEM_PRICE_1, sr.getTotalPrice());
 		Assert.assertEquals(0, sr.getDroppedItems().size());
     }
@@ -167,17 +172,23 @@ public class BuyCartIT extends BaseIT{
         assertEquals(0, l.size());
         List<CartItemView> li = sr.getPurchasedItems();
         assertEquals(2, li.size());
-        assertEquals(ITEM_QUANTITY,li.get(0).getQuantity());
-        assertEquals(ITEM_PRICE_1,li.get(0).getItem().getPrice());
-        assertEquals(ITEM_DESC_1,li.get(0).getItem().getDesc());
-        assertEquals(ITEM_ID_1,li.get(0).getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_1,li.get(0).getItem().getItemId().getSupplierId());
+        CartItemView cv0 = li.get(0);
+        CartItemView cv1 = li.get(1);
         
-        assertEquals(ITEM_QUANTITY,li.get(1).getQuantity());
-        assertEquals(ITEM_PRICE_2,li.get(1).getItem().getPrice());
-        assertEquals(ITEM_DESC_2,li.get(1).getItem().getDesc());
-        assertEquals(ITEM_ID_2,li.get(1).getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_1,li.get(1).getItem().getItemId().getSupplierId());
+        if(ITEM_ID_1 != cv0.getItem().getItemId().getProductId()){
+			cv0 = swap(cv1, cv1=cv0); 
+        }
+        assertEquals(ITEM_QUANTITY,cv0.getQuantity());
+        assertEquals(ITEM_PRICE_1,cv0.getItem().getPrice());
+        assertEquals(ITEM_DESC_1,cv0.getItem().getDesc());
+        assertEquals(ITEM_ID_1,cv0.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_1,cv0.getItem().getItemId().getSupplierId());
+        
+        assertEquals(ITEM_QUANTITY,cv1.getQuantity());
+        assertEquals(ITEM_PRICE_2,cv1.getItem().getPrice());
+        assertEquals(ITEM_DESC_2,cv1.getItem().getDesc());
+        assertEquals(ITEM_ID_2,cv1.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_1,cv1.getItem().getItemId().getSupplierId());
         
 		Assert.assertEquals(ITEM_PRICE_1 + ITEM_PRICE_2, sr.getTotalPrice());
 		Assert.assertEquals(0, sr.getDroppedItems().size());
@@ -191,17 +202,23 @@ public class BuyCartIT extends BaseIT{
         assertEquals(0, l.size());
         List<CartItemView> li = sr.getPurchasedItems();
         assertEquals(2, li.size());
-        assertEquals(ITEM_QUANTITY,li.get(0).getQuantity());
-        assertEquals(ITEM_PRICE_1,li.get(0).getItem().getPrice());
-        assertEquals(ITEM_DESC_1,li.get(0).getItem().getDesc());
-        assertEquals(ITEM_ID_1,li.get(0).getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_1,li.get(0).getItem().getItemId().getSupplierId());
+        CartItemView cv0 = li.get(0);
+        CartItemView cv1 = li.get(1);
         
-        assertEquals(ITEM_QUANTITY,li.get(1).getQuantity());
-        assertEquals(ITEM_PRICE_3,li.get(1).getItem().getPrice());
-        assertEquals(ITEM_DESC_3,li.get(1).getItem().getDesc());
-        assertEquals(ITEM_ID_3,li.get(1).getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_2,li.get(1).getItem().getItemId().getSupplierId());
+        if(ITEM_ID_1 != cv0.getItem().getItemId().getProductId()){
+			cv0 = swap(cv1, cv1=cv0); 
+        }
+        assertEquals(ITEM_QUANTITY,cv0.getQuantity());
+        assertEquals(ITEM_PRICE_1,cv0.getItem().getPrice());
+        assertEquals(ITEM_DESC_1,cv0.getItem().getDesc());
+        assertEquals(ITEM_ID_1,cv0.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_1,cv0.getItem().getItemId().getSupplierId());
+        
+        assertEquals(ITEM_QUANTITY,cv1.getQuantity());
+        assertEquals(ITEM_PRICE_3,cv1.getItem().getPrice());
+        assertEquals(ITEM_DESC_3,cv1.getItem().getDesc());
+        assertEquals(ITEM_ID_3,cv1.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_2,cv1.getItem().getItemId().getSupplierId());
         
 		Assert.assertEquals(ITEM_PRICE_1 + ITEM_PRICE_3, sr.getTotalPrice());
 		Assert.assertEquals(0, sr.getDroppedItems().size());
@@ -216,11 +233,12 @@ public class BuyCartIT extends BaseIT{
         assertEquals(0, l.size());
         List<CartItemView> li = sr.getDroppedItems();
         assertEquals(1, li.size());
-        assertEquals(ITEM_QUANTITY,li.get(0).getQuantity());
-        assertEquals(ITEM_PRICE_1,li.get(0).getItem().getPrice());
-        assertEquals(ITEM_DESC_1,li.get(0).getItem().getDesc());
-        assertEquals(ITEM_ID_1,li.get(0).getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_1,li.get(0).getItem().getItemId().getSupplierId());
+        CartItemView cv0 = li.get(0);
+        assertEquals(ITEM_QUANTITY,cv0.getQuantity());
+        assertEquals(ITEM_PRICE_1,cv0.getItem().getPrice());
+        assertEquals(ITEM_DESC_1,cv0.getItem().getDesc());
+        assertEquals(ITEM_ID_1,cv0.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_1,cv0.getItem().getItemId().getSupplierId());
 		Assert.assertEquals(ITEM_PRICE_1, sr.getTotalPrice());
 		Assert.assertEquals(0, sr.getPurchasedItems().size());
     }
@@ -235,19 +253,21 @@ public class BuyCartIT extends BaseIT{
         assertEquals(0, l.size());
         List<CartItemView> li = sr.getDroppedItems();
         assertEquals(1, li.size());
-        assertEquals(ITEM_QUANTITY,li.get(0).getQuantity());
-        assertEquals(ITEM_PRICE_1,li.get(0).getItem().getPrice());
-        assertEquals(ITEM_DESC_1,li.get(0).getItem().getDesc());
-        assertEquals(ITEM_ID_1,li.get(0).getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_1,li.get(0).getItem().getItemId().getSupplierId());
+        CartItemView cv0 = li.get(0);
+        assertEquals(ITEM_QUANTITY,cv0.getQuantity());
+        assertEquals(ITEM_PRICE_1,cv0.getItem().getPrice());
+        assertEquals(ITEM_DESC_1,cv0.getItem().getDesc());
+        assertEquals(ITEM_ID_1,cv0.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_1,cv0.getItem().getItemId().getSupplierId());
 		Assert.assertEquals(ITEM_PRICE_1, sr.getTotalPrice());
         li = sr.getPurchasedItems();
         assertEquals(1, li.size());
-        assertEquals(ITEM_QUANTITY,li.get(0).getQuantity());
-        assertEquals(ITEM_PRICE_2,li.get(0).getItem().getPrice());
-        assertEquals(ITEM_DESC_2,li.get(0).getItem().getDesc());
-        assertEquals(ITEM_ID_2,li.get(0).getItem().getItemId().getProductId());
-        assertEquals(SUPPLIER_ID_1,li.get(0).getItem().getItemId().getSupplierId());
+        cv0 = li.get(0);
+        assertEquals(ITEM_QUANTITY,cv0.getQuantity());
+        assertEquals(ITEM_PRICE_2,cv0.getItem().getPrice());
+        assertEquals(ITEM_DESC_2,cv0.getItem().getDesc());
+        assertEquals(ITEM_ID_2,cv0.getItem().getItemId().getProductId());
+        assertEquals(SUPPLIER_ID_1,cv0.getItem().getItemId().getSupplierId());
 		Assert.assertEquals(ITEM_PRICE_2, sr.getTotalPrice());
     }
 
