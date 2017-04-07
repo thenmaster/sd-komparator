@@ -134,6 +134,7 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+		Mediator m = Mediator.getInstance();
 		if(cartId == null)
 			this.invalidCartIdExcpetionHelper("Null cart id!");
 		cartId = cartId.trim();
@@ -146,10 +147,14 @@ public class MediatorPortImpl implements MediatorPortType{
 		try{
 			SupplierClient sc = new SupplierClient(this.endpointManager.getUddiURL(), itemId.getSupplierId());
 			ProductView p = sc.getProduct(itemId.getProductId());
-			if (p == null)
+			if (p == null){
 				this.invalidItemIdExcpetionHelper("Unknown Item!");
-			if(itemQty <= p.getQuantity()){
-				Mediator m = Mediator.getInstance();
+				return;
+			}
+			int initialQuantity = 0;
+			if(m.getCart(cartId).getItem(itemId.getProductId()) != null)
+				initialQuantity = m.getCart(cartId).getItem(itemId.getProductId()).getQuantity();
+			if(itemQty+initialQuantity <= p.getQuantity()){
 				m.addItem(cartId,new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
 				return;
 			}
