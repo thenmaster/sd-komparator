@@ -142,6 +142,8 @@ public class MediatorPortImpl implements MediatorPortType{
 			this.invalidCartIdExceptionHelper("Empty cart id!");
 		if (itemId == null)
 			this.invalidItemIdExceptionHelper("Null item id!");
+		if (itemId.getProductId() == null || itemId.getSupplierId() == null)
+			this.invalidItemIdExceptionHelper("One or more itemId atributes are null!");
 		if (itemQty <= 0)
 			this.invalidQuantityExceptionHelper("Invalid quantity!");
 		try{
@@ -151,7 +153,7 @@ public class MediatorPortImpl implements MediatorPortType{
 				this.invalidItemIdExceptionHelper("Unknown Item!");
 			}
 			int initialQuantity = 0;
-			if(m.getCart(cartId).getItem(itemId.getProductId()) != null)
+			if(m.cartExists(cartId) && m.getCart(cartId).getItem(itemId.getProductId()) != null && m.getCart(cartId).getItem(itemId.getProductId()).getSupplierId() == itemId.getSupplierId())
 				initialQuantity = m.getCart(cartId).getItem(itemId.getProductId()).getQuantity();
 			if(itemQty+initialQuantity <= p.getQuantity()){
 				m.addItem(cartId,new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
