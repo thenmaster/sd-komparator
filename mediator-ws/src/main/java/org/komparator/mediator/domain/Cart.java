@@ -29,7 +29,7 @@ public class Cart {
 		if(!this.items.isEmpty()){
 			for (CartItem cartItem : items) {
 				if (cartItem.getProductId() == item.getProductId() && cartItem.getSupplierId() == item.getSupplierId()){
-					cartItem.setQuantity(cartItem.getQuantity()+item.getQuantity());
+					cartItem.setQuantity(cartItem.getQuantity() + item.getQuantity());
 					return;
 				}
 			}

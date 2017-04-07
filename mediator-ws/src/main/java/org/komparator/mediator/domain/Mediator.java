@@ -19,16 +19,11 @@ public class Mediator {
 
 	private Map<String, ShoppingResult> purchases = new ConcurrentHashMap<>();
 
-	private AtomicInteger counter = new AtomicInteger(1); // counter for shopping
+	private AtomicInteger counter = new AtomicInteger(1); // counter for unique shopping Id's
 
 	private Mediator() {
 	}
 
-	/**
-	 * SingletonHolder is loaded on the first execution of
-	 * Singleton.getInstance() or the first access to SingletonHolder.INSTANCE,
-	 * not before.
-	 */
 	private static class SingletonHolder {
 		private static final Mediator INSTANCE = new Mediator();
 	}
@@ -64,9 +59,6 @@ public class Mediator {
 	}
 
 	public ShoppingResult buyCart(String uddiUrl,String cartId) throws InvalidCartId_Exception{
-		if(this.getCart(cartId) == null){
-			throw new InvalidCartId_Exception(cartId, null);
-		}
 		Cart c = this.carts.remove(cartId);
 
 		ShoppingResult sr = new ShoppingResult(Integer.toString(this.counter.getAndIncrement()));
@@ -75,7 +67,7 @@ public class Mediator {
 				SupplierClient sc = new SupplierClient(uddiUrl,ci.getSupplierId());
 				sc.buyProduct(ci.getProductId(), ci.getQuantity());
 				sr.addPurchased(ci);
-				sr.incPrice(ci.getPrice()*ci.getQuantity());
+				sr.incPrice(ci.getPrice() * ci.getQuantity());
 			} catch (UDDINamingException | BadProductId_Exception | BadQuantity_Exception | InsufficientQuantity_Exception e)  {
 				sr.addNotPurchased(ci);
 			}

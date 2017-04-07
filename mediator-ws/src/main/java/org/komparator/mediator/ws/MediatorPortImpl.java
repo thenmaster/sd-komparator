@@ -61,8 +61,10 @@ public class MediatorPortImpl implements MediatorPortType{
 				}
 			}
 			Collections.sort(list, (o1, o2) -> Integer.compare(o1.getPrice(), o2.getPrice()));
+
 		}catch(UDDINamingException e){
-			this.invalidItemIdExceptionHelper("Failed to connect to suplier!");
+			this.invalidItemIdExceptionHelper("Failed to connect to supplier!");
+
 		}catch(BadProductId_Exception e){
 			this.invalidItemIdExceptionHelper("Invalid item id!");
 		}
@@ -93,7 +95,7 @@ public class MediatorPortImpl implements MediatorPortType{
 											   Integer.compare(o1.getPrice(), o2.getPrice()));
 
 		}catch(UDDINamingException e){
-			this.invalidTextExceptionHelper("Failed to connect to suplier!");
+			this.invalidTextExceptionHelper("Failed to connect to supplier!");
 		}catch(BadText_Exception e){
 			this.invalidTextExceptionHelper("Invalid item description!");
 		}
@@ -126,7 +128,6 @@ public class MediatorPortImpl implements MediatorPortType{
 		}
 
 		ShoppingResult sr = m.buyCart(this.endpointManager.getUddiURL(), cartId);
-
 
 		return this.newShoppingResultView(sr);
 	}
