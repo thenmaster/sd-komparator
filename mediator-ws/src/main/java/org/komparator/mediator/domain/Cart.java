@@ -37,7 +37,7 @@ public class Cart {
 		items.add(item);
 	}
 
-	public CartItem getItem(String reference){
+	public synchronized CartItem getItem(String reference){
 		for (CartItem cartItem : items) {
 			if(cartItem.getProductId().equals(reference));
 			return cartItem;

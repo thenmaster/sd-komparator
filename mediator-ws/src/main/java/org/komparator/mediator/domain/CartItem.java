@@ -52,11 +52,11 @@ public class CartItem {
 		this.price = price;
 	}
 
-	public int getQuantity() {
+	public synchronized int getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(int quantity) {
+	public synchronized void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
 

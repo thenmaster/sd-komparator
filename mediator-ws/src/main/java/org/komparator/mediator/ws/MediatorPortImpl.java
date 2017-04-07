@@ -191,8 +191,7 @@ public class MediatorPortImpl implements MediatorPortType{
 				s.clear();
 			}
 		} catch (UDDINamingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 		}
 		Mediator.getInstance().reset();
 

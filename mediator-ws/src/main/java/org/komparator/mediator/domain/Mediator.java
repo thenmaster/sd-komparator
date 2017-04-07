@@ -77,7 +77,7 @@ public class Mediator {
 				sr.addPurchased(ci);
 				sr.incPrice(ci.getPrice()*ci.getQuantity());
 			} catch (UDDINamingException | BadProductId_Exception | BadQuantity_Exception | InsufficientQuantity_Exception e)  {
-				sr.addNotPurchased(ci); // do something about exceptions
+				sr.addNotPurchased(ci);
 			}
 		}
 
