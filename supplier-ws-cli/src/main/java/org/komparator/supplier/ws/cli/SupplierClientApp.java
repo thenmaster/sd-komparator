@@ -15,7 +15,7 @@ public class SupplierClientApp {
 		if (args.length == 1){ // not using UDDI
 			client = new SupplierClient(args[0]);
 		}
-		else if (args.length >= 3) {
+		else if (args.length >= 2) {
 			client = new SupplierClient(args[0],args[1]);
 		}
 
