@@ -4,5 +4,11 @@
         <handler>
             <handler-class>org.komparator.security.handler.LoggingHandler</handler-class>
         </handler>
+        <handler>
+            <handler-class>org.komparator.security.handler.TimeHandler</handler-class>
+        </handler>
+        <handler>
+            <handler-class>org.komparator.security.handler.LoggingHandler</handler-class>
+        </handler>
     </handler-chain>
 </handler-chains>
