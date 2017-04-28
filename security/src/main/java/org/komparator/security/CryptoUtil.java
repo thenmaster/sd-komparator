@@ -3,7 +3,6 @@ package org.komparator.security;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-//import java.security.Signature;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

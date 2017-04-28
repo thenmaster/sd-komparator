@@ -1,21 +1,14 @@
 package org.komparator.security.handler;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
-import javax.xml.soap.Name;
 import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 import javax.xml.ws.handler.MessageContext;
@@ -127,7 +120,7 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 		System.out.print("[");
 		System.out.print(dateFormatter.format(new Date()));
 		System.out.print("] ");
-		
+
 		System.out.print("intercepted ");
 		if (outbound)
 			System.out.print("OUTbound");
