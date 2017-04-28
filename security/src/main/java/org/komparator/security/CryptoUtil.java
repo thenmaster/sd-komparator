@@ -3,6 +3,7 @@ package org.komparator.security;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+//import java.security.Signature;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -12,7 +13,7 @@ import javax.crypto.NoSuchPaddingException;
 public class CryptoUtil {
 
     public byte[] asymCipher(byte[] data, Key key){
-
+    	//Signature s  para "SHA256withRSA"
     	Cipher cipher;
 		try {
 			cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
