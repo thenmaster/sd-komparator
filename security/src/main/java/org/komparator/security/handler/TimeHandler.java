@@ -47,7 +47,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				SOAPHeaderElement element = sh.addHeaderElement(name);
 
 				LocalDateTime now = LocalDateTime.now();
-				now = now.plusSeconds(-10); // uncomment to test
+				//now = now.plusSeconds(-10); // uncomment to test
 				String timeString = dateFormatter.format(now);
 				element.addTextNode(timeString);
 			} catch (SOAPException e) {
@@ -89,7 +89,6 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 
 			//check if time difference between message send time and current time is less than 3 seconds
 			if(Duration.between(intime, now).getSeconds() > 3 ){
-				System.out.println("Should fail.....");
 				return false;
 			}
 

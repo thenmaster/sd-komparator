@@ -5,14 +5,8 @@
             <handler-class>org.komparator.security.handler.LoggingHandler</handler-class>
         </handler>
         <handler>
-            <handler-class>org.komparator.security.handler.TimeHandler</handler-class>
+            <handler-class>org.komparator.security.handler.CypherHandler</handler-class>
         </handler>
-        <handler>
-			<handler-class>org.komparator.security.handler.CertificateHandler</handler-class>
-		</handler>
-		<handler>
-			<handler-class>org.komparator.security.handler.DigitalSignatureHandler</handler-class>
-		</handler>
         <handler>
             <handler-class>org.komparator.security.handler.LoggingHandler</handler-class>
         </handler>
