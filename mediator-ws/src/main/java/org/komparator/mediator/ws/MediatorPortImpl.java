@@ -156,6 +156,7 @@ public class MediatorPortImpl implements MediatorPortType{
 			int initialQuantity = 0;
 			if(m.cartExists(cartId) && m.getCart(cartId).getItem(itemId.getProductId()) != null && m.getCart(cartId).getItem(itemId.getProductId()).getSupplierId() == itemId.getSupplierId())
 				initialQuantity = m.getCart(cartId).getItem(itemId.getProductId()).getQuantity();
+			System.out.println(itemQty + " " + initialQuantity + " " + p.getQuantity());
 			if(itemQty+initialQuantity <= p.getQuantity()){
 				m.addItem(cartId,new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
 				return;

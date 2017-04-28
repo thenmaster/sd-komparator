@@ -1,6 +1,7 @@
 package org.komparator.supplier.ws.it;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -10,7 +11,10 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.komparator.supplier.ws.*;
+import org.komparator.supplier.ws.BadProductId_Exception;
+import org.komparator.supplier.ws.BadProduct_Exception;
+import org.komparator.supplier.ws.BadText_Exception;
+import org.komparator.supplier.ws.ProductView;
 
 /**
  * Test suite
@@ -26,7 +30,7 @@ public class SearchProductsIT extends BaseIT {
 		client.clear();
 
 		// fill-in test products
-		// (since getProduct is read-only the initialization below
+		// (since searchProducts is read-only the initialization below
 		// can be done once for all tests in this suite)
 		{
 			ProductView product = new ProductView();
@@ -51,11 +55,20 @@ public class SearchProductsIT extends BaseIT {
 			product.setPrice(30);
 			product.setQuantity(30);
 			client.createProduct(product);
-		}	
+		}
+		{
+			ProductView product = new ProductView();
+			product.setId("K4");
+			product.setDesc("T-shirt");
+			product.setPrice(10);
+			product.setQuantity(30);
+			client.createProduct(product);
+		}
 	}
 
 	@AfterClass
 	public static void oneTimeTearDown() {
+		// clear remote service state after all tests
 		client.clear();
 	}
 
@@ -79,44 +92,86 @@ public class SearchProductsIT extends BaseIT {
 	// bad input tests
 
 	@Test(expected = BadText_Exception.class)
-	public void searchProductsNullIdTest() throws BadText_Exception {
+	public void searchProductsNullTest() throws BadText_Exception {
 		client.searchProducts(null);
 	}
-	
+
 	@Test(expected = BadText_Exception.class)
-	public void searchProductsEmptyIdTest() throws BadText_Exception {
+	public void searchProductsEmptyTest() throws BadText_Exception {
 		client.searchProducts("");
 	}
-	
-	@Test(expected = BadText_Exception.class)
-	public void searchProductsBlankIdTest() throws BadText_Exception {
-		client.searchProducts("       ");
-	}
-	
-	@Test(expected = BadText_Exception.class)
-	public void searchProductsEOLidTest() throws BadText_Exception {
-		client.searchProducts("\n");
-	}
-	
-	@Test(expected = BadText_Exception.class)
-	public void searchProductsTabIdTest() throws BadText_Exception {
-		client.searchProducts("\t");
-	}
-	
+
 	// main tests
-	
+
 	@Test
-	public void searchProductsEmptyReturnListTest() throws BadText_Exception {
-		List<ProductView> list = client.searchProducts("Football");
-		assertEquals(list.size(),0);
+	public void searchProductsOneMatchTest() throws BadText_Exception {
+		List<ProductView> products = client.searchProducts("Soccer ball");
+		assertNotNull(products);
+		assertEquals(1, products.size());
+
+		ProductView product = products.get(0);
+		assertEquals("Z3", product.getId());
+		assertEquals(30, product.getPrice());
+		assertEquals(30, product.getQuantity());
+		assertEquals("Soccer ball", product.getDesc());
 	}
-	
+
 	@Test
-	public void searchProductsSucessTest() throws BadText_Exception {
-		List<ProductView> list = client.searchProducts("Bas");
-		assertEquals(list.size(),2);
-		for (ProductView pv : list)
-			assertTrue(pv.getDesc().contains("Bas"));
+	public void searchProductsAllMatchTest() throws BadText_Exception {
+		List<ProductView> products = client.searchProducts("ball");
+		assertNotNull(products);
+		assertEquals(3, products.size());
+
+		// no ordering is imposed on results
+		// check if descriptions all contain the search term
+		for (ProductView product : products) {
+			assertTrue(product.getDesc().indexOf("ball") >= 0);
+		}
+	}
+
+	@Test
+	public void searchProductsSomeMatchTest() throws BadText_Exception {
+		List<ProductView> products = client.searchProducts("Bas");
+		assertNotNull(products);
+		assertEquals(2, products.size());
+
+		// no ordering is imposed on results
+		// check if descriptions all contain the search term
+		for (ProductView product : products) {
+			assertTrue(product.getDesc().indexOf("Bas") >= 0);
+		}
+	}
+
+	@Test
+	public void searchProductsNoMatchTest() throws BadText_Exception {
+		List<ProductView> products = client.searchProducts("nOTtHERE");
+		// when products are not found,
+		// an empty list should be returned (not null)
+		assertNotNull(products);
+		assertEquals(0, products.size());
+	}
+
+	@Test
+	public void searchProductsCaseTest() throws BadText_Exception {
+		// product descriptions are case sensitive,
+		// so "BALL" is not the same as "ball"
+		List<ProductView> products = client.searchProducts("BALL");
+		assertNotNull(products);
+		assertEquals(0, products.size());
+	}
+
+	@Test
+	public void searchProductsPriceQtyTest() throws BadText_Exception {
+		// assure price and quantity are not swapped
+		List<ProductView> products = client.searchProducts("T-shirt");
+		assertNotNull(products);
+		assertEquals(1, products.size());
+
+		ProductView product = products.get(0);
+		assertEquals("K4", product.getId());
+		assertEquals(10, product.getPrice());
+		assertEquals(30, product.getQuantity());
+		assertEquals("T-shirt", product.getDesc());
 	}
 
 }

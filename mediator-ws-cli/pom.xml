@@ -26,6 +26,10 @@
         <uddi.url>http://a24:f19Ho2MJ@uddi.sd.rnl.tecnico.ulisboa.pt:9090</uddi.url>
         <uddi.user>a24</uddi.user>
         <uddi.pass>f19Ho2MJ</uddi.pass>
+        <uddi.enabled>true</uddi.enabled>
+        <supplier.ws.name>A24_Supplier</supplier.ws.name>
+        <!-- The url below contains a placeholder ($i) that will be replaced in run-time -->
+        <supplier.ws.url>http://localhost:808$i/supplier-ws/endpoint</supplier.ws.url>
     </properties>
 
     <dependencies>
