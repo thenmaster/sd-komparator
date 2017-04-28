@@ -13,11 +13,11 @@ public class Cart {
 		this.reference = reference;
 	}
 
-	public String getRefrence() {
+	public String getReference() {
 		return reference;
 	}
 
-	public void setRefrence(String refrence) {
+	public void setReference(String refrence) {
 		this.reference = refrence;
 	}
 
@@ -28,7 +28,7 @@ public class Cart {
 	public void addItem(CartItem item){
 		if(!this.items.isEmpty()){
 			for (CartItem cartItem : items) {
-				if (cartItem.getProductId() == item.getProductId() && cartItem.getSupplierId() == item.getSupplierId()){
+				if (cartItem.getProductId().equals(item.getProductId()) && cartItem.getSupplierId().equals(item.getSupplierId())){
 					cartItem.setQuantity(cartItem.getQuantity() + item.getQuantity());
 					return;
 				}
@@ -39,8 +39,8 @@ public class Cart {
 
 	public synchronized CartItem getItem(String reference){
 		for (CartItem cartItem : items) {
-			if(cartItem.getProductId().equals(reference));
-			return cartItem;
+			if(cartItem.getProductId().equals(reference))
+				return cartItem;
 		}
 		return null;
 	}

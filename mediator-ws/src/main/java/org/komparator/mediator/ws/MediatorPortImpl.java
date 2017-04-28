@@ -112,6 +112,8 @@ public class MediatorPortImpl implements MediatorPortType{
 		cartId = cartId.trim();
 		if (cartId.length() == 0)
 			this.invalidCartIdExceptionHelper("Empty cart id!");
+		if (!m.cartExists(cartId))
+			this.invalidCartIdExceptionHelper("Cart does not exist!");
 		if(creditCardNr == null)
 			this.invalidCreditCardExceptionHelper("Null credit card number!");
 		creditCardNr  = creditCardNr .trim();
@@ -143,7 +145,7 @@ public class MediatorPortImpl implements MediatorPortType{
 			this.invalidCartIdExceptionHelper("Empty cart id!");
 		if (itemId == null)
 			this.invalidItemIdExceptionHelper("Null item id!");
-		if (itemId.getProductId() == null || itemId.getSupplierId() == null)
+		if (itemId.getProductId() == null || itemId.getSupplierId() == null || itemId.getProductId().trim().equals("") || itemId.getSupplierId().trim().equals(""))
 			this.invalidItemIdExceptionHelper("One or more itemId atributes are null!");
 		if (itemQty <= 0)
 			this.invalidQuantityExceptionHelper("Invalid quantity!");
@@ -154,9 +156,10 @@ public class MediatorPortImpl implements MediatorPortType{
 				this.invalidItemIdExceptionHelper("Unknown Item!");
 			}
 			int initialQuantity = 0;
-			if(m.cartExists(cartId) && m.getCart(cartId).getItem(itemId.getProductId()) != null && m.getCart(cartId).getItem(itemId.getProductId()).getSupplierId() == itemId.getSupplierId())
+			if(m.cartExists(cartId) && m.getCart(cartId).getItem(itemId.getProductId()) != null && m.getCart(cartId).getItem(itemId.getProductId()).getSupplierId().equals(itemId.getSupplierId())){
 				initialQuantity = m.getCart(cartId).getItem(itemId.getProductId()).getQuantity();
-			System.out.println(itemQty + " " + initialQuantity + " " + p.getQuantity());
+			}
+
 			if(itemQty+initialQuantity <= p.getQuantity()){
 				m.addItem(cartId,new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
 				return;
@@ -243,7 +246,7 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	private CartView newCartView(Cart c){
 		CartView cv = new CartView();
-		cv.setCartId(c.getRefrence());
+		cv.setCartId(c.getReference());
 		for (CartItem ci : c.getItems()) {
 			cv.getItems().add(this.newCartItemView(ci));
 		}
