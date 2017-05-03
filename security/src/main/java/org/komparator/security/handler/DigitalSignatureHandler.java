@@ -1,19 +1,25 @@
 package org.komparator.security.handler;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.Name;
+import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
@@ -27,7 +33,8 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import org.komparator.security.CryptoUtil;
 
-import com.sun.xml.ws.developer.JAXWSProperties;
+import pt.ulisboa.tecnico.sdis.ws.cli.CAClient;
+import pt.ulisboa.tecnico.sdis.ws.cli.CAClientException;
 
 /**
  * This SOAPHandler outputs the contents of inbound and outbound messages.
@@ -56,6 +63,10 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		if (outbound){
+			if (context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY) != null){
+				System.out.println("Get out!");
+				return true;
+			}
 			SOAPMessage msg = context.getMessage();
 			SOAPPart sp = msg.getSOAPPart();
 			try {
@@ -67,7 +78,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 
 				Name name = se.createName("Signature", "s", "http://sig");
 				SOAPHeaderElement element = sh.addHeaderElement(name);
-
+				/*
 				String svcn = (String) context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
 
 				String filename = "/A24_Supplier";
@@ -95,15 +106,16 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				filename += ".jks";
 
 				System.out.println(filename + "   " + alias);
+				*/
 
-				InputStream is = this.getClass().getResourceAsStream(filename);
+				InputStream is = this.getClass().getResourceAsStream("/A24_Supplier1.jks");
 
 				PrivateKey key = null;
 
 				try {
 					KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 					keystore.load(is, "f19Ho2MJ".toCharArray());
-					key = (PrivateKey) keystore.getKey(alias, "f19Ho2MJ".toCharArray());
+					key = (PrivateKey) keystore.getKey("a24_supplier1", "f19Ho2MJ".toCharArray());
 				} catch (KeyStoreException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -120,13 +132,19 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+
 				String sigString = CryptoUtil.createSignature(msg.getSOAPBody().getTextContent(),key);
 				element.addTextNode(sigString);
+
 			} catch (SOAPException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}else{
+			if (context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY) == null){
+				System.out.println("Get out!");
+				return true;
+			}
 			SOAPMessage msg = context.getMessage();
 			SOAPPart sp = msg.getSOAPPart();
 			try {
@@ -139,7 +157,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					return true;
 				}
 
-				/*
+
 			Name name = se.createName("Signature", "s", "http://sig");
 
 			Iterator it =  sh.getChildElements(name);
@@ -153,8 +171,32 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 
 			String sigString = element.getValue();
 
-			//TODO Verificar sig string
-			*/
+			CAClient ca = null;
+			try {
+				ca = new CAClient("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca?WSDL");
+			} catch (CAClientException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			String certString = ca.getCertificate("A24_Supplier1");
+
+			byte[] bytes = certString.getBytes(StandardCharsets.UTF_8);
+			InputStream in = new ByteArrayInputStream(bytes);
+			CertificateFactory certFactory = null;
+			Certificate cert = null;
+			try {
+				certFactory = CertificateFactory.getInstance("X.509");
+				cert = certFactory.generateCertificate(in);
+			} catch (CertificateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			if (!(CryptoUtil.verifySignature(sigString, msg.getSOAPBody().getTextContent(), cert.getPublicKey()))){
+				return false;
+			}
+
 			} catch (SOAPException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
