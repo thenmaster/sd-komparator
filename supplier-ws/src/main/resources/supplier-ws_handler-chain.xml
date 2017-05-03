@@ -7,9 +7,6 @@
         <handler>
             <handler-class>org.komparator.security.handler.TimeHandler</handler-class>
         </handler>
-        <handler>
-			<handler-class>org.komparator.security.handler.CertificateHandler</handler-class>
-		</handler>
 		<handler>
 			<handler-class>org.komparator.security.handler.DigitalSignatureHandler</handler-class>
 		</handler>
