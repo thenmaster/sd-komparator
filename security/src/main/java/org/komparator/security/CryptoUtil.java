@@ -11,8 +11,7 @@ import javax.crypto.NoSuchPaddingException;
 
 public class CryptoUtil {
 
-    public byte[] asymCipher(byte[] data, Key key){
-    	//Signature s  para "SHA256withRSA"
+    public static byte[] asymCipher(byte[] data, Key key){
     	Cipher cipher;
 		try {
 			cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -38,7 +37,7 @@ public class CryptoUtil {
     	return null;
     }
 
-    public byte[] asymDecipher(byte[] data, Key key){
+    public static byte[] asymDecipher(byte[] data, Key key){
 
     	Cipher cipher;
 		try {

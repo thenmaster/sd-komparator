@@ -72,7 +72,7 @@ public class LoggingHandler implements SOAPHandler<SOAPMessageContext> {
 		System.out.print("[");
 		System.out.print(dateFormatter.format(new Date()));
 		System.out.print("] ");
-		
+
 		System.out.print("intercepted ");
 		if (outbound)
 			System.out.print("OUTbound");

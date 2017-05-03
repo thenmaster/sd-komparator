@@ -1,10 +1,21 @@
 package org.komparator.security.handler;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.Set;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPEnvelope;
@@ -15,8 +26,12 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
+import org.komparator.security.CryptoUtil;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import pt.ulisboa.tecnico.sdis.ws.cli.CAClient;
+import pt.ulisboa.tecnico.sdis.ws.cli.CAClientException;
 
 /**
  * This SOAPHandler encrypts the cc.
@@ -55,8 +70,30 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 					Node n = nl.item(i);
 					if (n.getNodeName().equals("creditCardNr")){
 						String ccString = n.getTextContent();
-						//byte [] b = asymCipher(ccString.getBytes(StandardCharsets.UTF_8), getpublicKey())
-						//n.setTextContent(printBase64Binary(b));
+						CAClient ca = null;
+						try {
+							ca = new CAClient("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca?WSDL");
+						} catch (CAClientException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						String certString = ca.getCertificate("A24_Mediator");
+
+						byte[] bytes = certString.getBytes(StandardCharsets.UTF_8);
+						InputStream in = new ByteArrayInputStream(bytes);
+						CertificateFactory certFactory = null;
+						Certificate cert = null;
+						try {
+							certFactory = CertificateFactory.getInstance("X.509");
+							cert = certFactory.generateCertificate(in);
+						} catch (CertificateException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						PublicKey key = cert.getPublicKey();
+						byte[] encCC = CryptoUtil.asymCipher(DatatypeConverter.parseBase64Binary(ccString), key);
+						String encCCString = DatatypeConverter.printBase64Binary(encCC);
+						n.setTextContent(encCCString);
 					}
 				}
 				return true;
@@ -74,9 +111,36 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 				for (int i = 0; i < nl.getLength(); i++) {
 					Node n = nl.item(i);
 					if (n.getNodeName().equals("creditCardNr")){
-						String ccString = n.getTextContent();
-						//byte [] b = asymDecipher(ccString.getBytes(StandardCharsets.UTF_8), getpublicKey())
-						//n.setTextContent(printBase64Binary(b));
+						String ccEnc = n.getTextContent();
+
+						InputStream is = this.getClass().getResourceAsStream("/A24_Mediator.jks");
+
+						PrivateKey key = null;
+
+						try {
+							KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+							keystore.load(is, "f19Ho2MJ".toCharArray());
+							key = (PrivateKey) keystore.getKey("a24_mediator", "f19Ho2MJ".toCharArray());
+						} catch (KeyStoreException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (NoSuchAlgorithmException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (CertificateException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (UnrecoverableKeyException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+						byte [] cc = CryptoUtil.asymDecipher(DatatypeConverter.parseBase64Binary(ccEnc), key);
+						String ccString = DatatypeConverter.printBase64Binary(cc);
+						n.setTextContent(ccString);
 					}
 				}
 				return true;
@@ -91,7 +155,6 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 	/** The handleFault method is invoked for fault message processing. */
 	@Override
 	public boolean handleFault(SOAPMessageContext smc) {
-		logToSystemOut(smc);
 		return true;
 	}
 
@@ -103,43 +166,4 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 	public void close(MessageContext messageContext) {
 		// nothing to clean up
 	}
-
-	/** Date formatter used for outputting timestamps in ISO 8601 format */
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-
-	/**
-	 * Check the MESSAGE_OUTBOUND_PROPERTY in the context to see if this is an
-	 * outgoing or incoming message. Write a brief message to the print stream
-	 * and output the message. The writeTo() method can throw SOAPException or
-	 * IOException
-	 */
-	private void logToSystemOut(SOAPMessageContext smc) {
-		Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-
-		// print current timestamp
-		System.out.print("[");
-		System.out.print(dateFormatter.format(new Date()));
-		System.out.print("] ");
-
-		System.out.print("intercepted ");
-		if (outbound)
-			System.out.print("OUTbound");
-		else
-			System.out.print(" INbound");
-		System.out.println(" SOAP message:");
-
-		SOAPMessage message = smc.getMessage();
-		try {
-			message.writeTo(System.out);
-			System.out.println(); // add a newline after message
-
-		} catch (SOAPException se) {
-			System.out.print("Ignoring SOAPException in handler: ");
-			System.out.println(se);
-		} catch (IOException ioe) {
-			System.out.print("Ignoring IOException in handler: ");
-			System.out.println(ioe);
-		}
-	}
-
 }
