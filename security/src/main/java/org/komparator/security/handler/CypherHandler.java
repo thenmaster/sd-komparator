@@ -4,11 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -90,8 +93,32 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						PublicKey key = cert.getPublicKey();
-						byte[] encCC = CryptoUtil.asymCipher(DatatypeConverter.parseBase64Binary(ccString), key);
+						
+						//verify the certificate with CA help
+						InputStream is = this.getClass().getResourceAsStream("/ca.cer");
+						Certificate caCert = null;
+						try {
+							caCert = certFactory.generateCertificate(is);
+							cert.verify(caCert.getPublicKey());
+						} catch (CertificateException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InvalidKeyException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (NoSuchAlgorithmException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (NoSuchProviderException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (SignatureException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						
+						byte[] encCC = CryptoUtil.asymCipher(DatatypeConverter.parseBase64Binary(ccString), cert.getPublicKey());
 						String encCCString = DatatypeConverter.printBase64Binary(encCC);
 						n.setTextContent(encCCString);
 					}
