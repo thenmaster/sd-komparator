@@ -17,6 +17,7 @@ public class SupplierApp {
 			endpoint = new SupplierEndpointManager(args[0]);
 		}
 		else if (args.length >= 3) {
+			System.setProperty("Service", args[1]);
 			endpoint = new SupplierEndpointManager(args[0],args[1],args[2]);
 		}
 

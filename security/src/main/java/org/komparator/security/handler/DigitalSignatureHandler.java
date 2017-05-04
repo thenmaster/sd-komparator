@@ -16,8 +16,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -29,7 +27,6 @@ import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPHeaderElement;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
-import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -59,7 +56,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		if (outbound){
-			if (context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY) != null){
+			if (System.getProperty("ServiceGet") != null){
 				System.out.println("Outbound messages to server are not signed.");
 				return true;
 			}
@@ -74,33 +71,13 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				Name name = se.createName("Signature", "s", "http://sig");
 				SOAPHeaderElement element = sh.addHeaderElement(name);
 
-				// get the request headers in order to determine the supplier that sent the message via the port number
-				@SuppressWarnings("unchecked")
-				Map<String, List<String>> headers = (Map<String, List<String>>)context.get(MessageContext.HTTP_REQUEST_HEADERS);
-				String host = headers.get("Host").get(0);
-
-				String filename = "/A24_Supplier";
-				String alias = "a24_supplier";
-
-				if(host.contains("8081")){
-					filename += "1";
-					alias += "1";
-				}else if(host.contains("8082")){
-					filename += "2";
-					alias += "2";
-				}else if(host.contains("8083")){
-					filename += "3";
-					alias += "3";
-				}else // supplier without any keys
-					return false;
-
-				InputStream is = this.getClass().getResourceAsStream(filename + ".jks");
+				InputStream is = this.getClass().getResourceAsStream("/" + System.getProperty("Service") + ".jks");
 				PrivateKey key = null;
 
 				try {
 					KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 					keystore.load(is, "f19Ho2MJ".toCharArray());
-					key = (PrivateKey) keystore.getKey(alias, "f19Ho2MJ".toCharArray());
+					key = (PrivateKey) keystore.getKey(System.getProperty("Service").toLowerCase(), "f19Ho2MJ".toCharArray());
 				} catch (KeyStoreException | NoSuchAlgorithmException e) {
 					System.out.println("Could not access keystore.");
 					return false;
@@ -125,7 +102,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				return false;
 			}
 		}else{
-			if (context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY) == null){
+			if (System.getProperty("ServiceGet") == null){
 				System.out.println("Inbound messages from client are not validated.");
 				return true;
 			}
@@ -160,19 +137,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					return false;
 				}
 
-				String host = (String) context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
-				String certname = "A24_Supplier";
-
-				if(host.contains("8081")){
-					certname += "1";
-				}else if(host.contains("8082")){
-					certname += "2";
-				}else if(host.contains("8083")){
-					certname += "3";
-				}else // supplier without any keys
-					return false;
-
-				String certString = ca.getCertificate(certname);
+				String certString = ca.getCertificate(System.getProperty("ServiceGet"));
 
 				byte[] bytes = certString.getBytes(StandardCharsets.UTF_8);
 				InputStream in = new ByteArrayInputStream(bytes);
@@ -210,6 +175,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					System.out.println("Message signature is incorrect.");
 					return false;
 				}
+
 			} catch (SOAPException e) {
 				System.out.println("Problem with SOAP message.");
 				return false;

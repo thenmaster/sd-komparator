@@ -16,6 +16,7 @@ import org.komparator.supplier.ws.ProductView;
 import org.komparator.supplier.ws.PurchaseView;
 import org.komparator.supplier.ws.SupplierPortType;
 import org.komparator.supplier.ws.SupplierService;
+
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINamingException;
 
@@ -61,8 +62,9 @@ public class SupplierClient implements SupplierPortType {
 		this.wsURL = wsURL;
 		createStub();
 	}
-	
+
 	public SupplierClient(String uddiURL, String serviceName) throws UDDINamingException{
+		System.setProperty("ServiceGet", serviceName);
 		this.uddiNaming = new UDDINaming(uddiURL);
 		String endpointAddress = this.uddiNaming.lookup(serviceName);
 		if (endpointAddress == null) {
