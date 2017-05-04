@@ -12,9 +12,9 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -78,25 +78,21 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 
 				Name name = se.createName("Signature", "s", "http://sig");
 				SOAPHeaderElement element = sh.addHeaderElement(name);
-				/*
-				String svcn = (String) context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+				Map<String, List<String>> headers = (Map<String, List<String>>)context.get(MessageContext.HTTP_REQUEST_HEADERS);
+				String host = headers.get("Host").get(0);
 
 				String filename = "/A24_Supplier";
 				String alias = "a24_supplier";
 
-				System.out.println(msg.getSOAPBody().getTextContent());
-				System.out.println(context.get(JAXWSProperties.HTTP_REQUEST_URL));
-				System.out.println(context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY));
-
-				if(svcn.contains("8081")){
+				if(host.contains("8081")){
 					filename += "1";
 					alias += "1";
 				}
-				else if(svcn.contains("8082")){
+				else if(host.contains("8082")){
 					filename += "2";
 					alias += "2";
 				}
-				else if(svcn.contains("8083")){
+				else if(host.contains("8083")){
 					filename += "3";
 					alias += "3";
 				}
@@ -105,17 +101,14 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 
 				filename += ".jks";
 
-				System.out.println(filename + "   " + alias);
-				*/
-
-				InputStream is = this.getClass().getResourceAsStream("/A24_Supplier1.jks");
+				InputStream is = this.getClass().getResourceAsStream(filename);
 
 				PrivateKey key = null;
 
 				try {
 					KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 					keystore.load(is, "f19Ho2MJ".toCharArray());
-					key = (PrivateKey) keystore.getKey("a24_supplier1", "f19Ho2MJ".toCharArray());
+					key = (PrivateKey) keystore.getKey(alias, "f19Ho2MJ".toCharArray());
 				} catch (KeyStoreException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -164,7 +157,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 
 			if (!it.hasNext()) {
 				System.out.println("Header element not found.");
-				return true;
+				return false;
 			}
 
 			SOAPElement element = (SOAPElement) it.next();
@@ -179,7 +172,31 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				e.printStackTrace();
 			}
 
-			String certString = ca.getCertificate("A24_Supplier1");
+			/*Map<String, List<String>> headers = (Map<String, List<String>>)context.get(MessageContext.HTTP_REQUEST_HEADERS);
+			for (String s : headers.keySet()) {
+				System.out.println(s);
+				for (String i : headers.get(s)) {
+					System.out.println("	" + i);
+				}
+			}
+			*/
+			String host = (String) context.get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
+
+			String certname = "A24_Supplier";
+
+			if(host.contains("8081")){
+				certname += "1";
+			}
+			else if(host.contains("8082")){
+				certname += "2";
+			}
+			else if(host.contains("8083")){
+				certname += "3";
+			}
+			else // supplier without any keys
+				return false;
+
+			String certString = ca.getCertificate(certname);
 
 			byte[] bytes = certString.getBytes(StandardCharsets.UTF_8);
 			InputStream in = new ByteArrayInputStream(bytes);
@@ -209,7 +226,6 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 	/** The handleFault method is invoked for fault message processing. */
 	@Override
 	public boolean handleFault(SOAPMessageContext smc) {
-		logToSystemOut(smc);
 		return true;
 	}
 
@@ -220,44 +236,6 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 	@Override
 	public void close(MessageContext messageContext) {
 		// nothing to clean up
-	}
-
-	/** Date formatter used for outputting timestamps in ISO 8601 format */
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-
-	/**
-	 * Check the MESSAGE_OUTBOUND_PROPERTY in the context to see if this is an
-	 * outgoing or incoming message. Write a brief message to the print stream
-	 * and output the message. The writeTo() method can throw SOAPException or
-	 * IOException
-	 */
-	private void logToSystemOut(SOAPMessageContext smc) {
-		Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
-
-		// print current timestamp
-		System.out.print("[");
-		System.out.print(dateFormatter.format(new Date()));
-		System.out.print("] ");
-
-		System.out.print("intercepted ");
-		if (outbound)
-			System.out.print("OUTbound");
-		else
-			System.out.print(" INbound");
-		System.out.println(" SOAP message:");
-
-		SOAPMessage message = smc.getMessage();
-		try {
-			message.writeTo(System.out);
-			System.out.println(); // add a newline after message
-
-		} catch (SOAPException se) {
-			System.out.print("Ignoring SOAPException in handler: ");
-			System.out.println(se);
-		} catch (IOException ioe) {
-			System.out.print("Ignoring IOException in handler: ");
-			System.out.println(ioe);
-		}
 	}
 
 }
