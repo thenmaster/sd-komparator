@@ -51,8 +51,8 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				String timeString = dateFormatter.format(now);
 				element.addTextNode(timeString);
 			} catch (SOAPException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("Problem with SOAP message.");
+				return false;
 			}
 		}
 		else{
@@ -72,6 +72,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 
 			Name name = se.createName("timeHeader", "t", "http://time");
 
+			@SuppressWarnings("rawtypes")
 			Iterator it =  sh.getChildElements(name);
 
 			if (!it.hasNext()) {
@@ -93,18 +94,15 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 			}
 
 			} catch (SOAPException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("Problem with SOAP message.");
+				return false;
 			}
-
-
 		}
 		return true;
 	}
 
 	@Override
 	public boolean handleFault(SOAPMessageContext context) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

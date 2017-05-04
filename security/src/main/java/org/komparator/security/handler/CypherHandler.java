@@ -10,7 +10,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
@@ -40,10 +39,6 @@ import pt.ulisboa.tecnico.sdis.ws.cli.CAClientException;
  * This SOAPHandler encrypts the cc.
  */
 public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
-
-	//
-	// Handler interface implementation
-	//
 
 	/**
 	 * Gets the header blocks that can be processed by this Handler instance. If
@@ -77,56 +72,54 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 						try {
 							ca = new CAClient("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca?WSDL");
 						} catch (CAClientException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							System.out.println("Could not connect to certification authority");
+							return false;
 						}
-						String certString = ca.getCertificate("A24_Mediator");
 
+						String certString = ca.getCertificate("A24_Mediator");
 						byte[] bytes = certString.getBytes(StandardCharsets.UTF_8);
 						InputStream in = new ByteArrayInputStream(bytes);
 						CertificateFactory certFactory = null;
 						Certificate cert = null;
+
 						try {
 							certFactory = CertificateFactory.getInstance("X.509");
 							cert = certFactory.generateCertificate(in);
 						} catch (CertificateException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							System.out.println("Could not generate certificate");
+							return false;
 						}
-						
+
 						//verify the certificate with CA help
 						InputStream is = this.getClass().getResourceAsStream("/ca.cer");
 						Certificate caCert = null;
 						try {
 							caCert = certFactory.generateCertificate(is);
 							cert.verify(caCert.getPublicKey());
-						} catch (CertificateException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						} catch (CertificateException | NoSuchAlgorithmException e) {
+							System.out.println("Could not generate certificate.");
+							return false;
 						} catch (InvalidKeyException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (NoSuchAlgorithmException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							System.out.println("Could not get authority public key.");
+							return false;
 						} catch (NoSuchProviderException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							System.out.println("Provider not found.");
+							return false;
 						} catch (SignatureException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							System.out.println("Certificate verification failed.");
+							return false;
 						}
-						
-						
+
 						byte[] encCC = CryptoUtil.asymCipher(DatatypeConverter.parseBase64Binary(ccString), cert.getPublicKey());
+						if (encCC == null)
+							return false;
 						String encCCString = DatatypeConverter.printBase64Binary(encCC);
 						n.setTextContent(encCCString);
 					}
 				}
-				return true;
 			} catch (SOAPException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("Problem with SOAP message.");
+				return false;
 			}
 		}else{
 			SOAPMessage msg = context.getMessage();
@@ -139,9 +132,7 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 					Node n = nl.item(i);
 					if (n.getNodeName().equals("creditCardNr")){
 						String ccEnc = n.getTextContent();
-
 						InputStream is = this.getClass().getResourceAsStream("/A24_Mediator.jks");
-
 						PrivateKey key = null;
 
 						try {
@@ -149,34 +140,32 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 							keystore.load(is, "f19Ho2MJ".toCharArray());
 							key = (PrivateKey) keystore.getKey("a24_mediator", "f19Ho2MJ".toCharArray());
 						} catch (KeyStoreException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (NoSuchAlgorithmException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (CertificateException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							System.out.println("Failed to load keystore.");
+							return false;
+						} catch (CertificateException | NoSuchAlgorithmException e) {
+							System.out.println("Could not load keystore certificates");
+							return false;
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							System.out.println("Failed to load keystore");
+							return false;
 						} catch (UnrecoverableKeyException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							System.out.println("Could not recover private key from keystore");
+							return false;
 						}
 
 						byte [] cc = CryptoUtil.asymDecipher(DatatypeConverter.parseBase64Binary(ccEnc), key);
+						if (cc == null)
+							return false;
 						String ccString = DatatypeConverter.printBase64Binary(cc);
 						n.setTextContent(ccString);
 					}
 				}
-				return true;
 			} catch (SOAPException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.out.println("Problem with SOAP message.");
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/** The handleFault method is invoked for fault message processing. */
