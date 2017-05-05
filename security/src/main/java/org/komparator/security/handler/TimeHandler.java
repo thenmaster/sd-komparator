@@ -51,8 +51,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				String timeString = dateFormatter.format(now);
 				element.addTextNode(timeString);
 			} catch (SOAPException e) {
-				System.out.println("Problem with SOAP message.");
-				return false;
+				throw new RuntimeException("Problem with SOAP message.");
 			}
 		}
 		else{
@@ -94,8 +93,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 			}
 
 			} catch (SOAPException e) {
-				System.out.println("Problem with SOAP message.");
-				return false;
+				throw new RuntimeException("Problem with SOAP message.");
 			}
 		}
 		return true;

@@ -1,6 +1,8 @@
 package org.komparator.security;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -97,5 +99,31 @@ public class CryptoUtilTest {
 		String decodMessage = new String(decodMessageBytes);
 		
 		assertEquals(plainText, decodMessage);
+	}
+    
+    @Test
+	public void testCipherPublicDecipherPublic() throws Exception {
+    	InputStream is = this.getClass().getResourceAsStream("/example.cer");
+		CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+		Certificate cert = certFactory.generateCertificate(is);
+		PublicKey publicKey = cert.getPublicKey();
+
+		byte [] encMessageBytes = CryptoUtil.asymCipher(plainText.getBytes(), publicKey);
+		
+		byte[] decodMessageBytes = CryptoUtil.asymDecipher(encMessageBytes, publicKey);
+		assertNull(decodMessageBytes);
+	}
+    
+    @Test
+	public void testCipherPrivateDecipherPrivate() throws Exception {
+    	InputStream is = this.getClass().getResourceAsStream("/example.jks");
+		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+		keystore.load(is, "1nsecure".toCharArray());
+		PrivateKey privateKey = (PrivateKey) keystore.getKey("example", "ins3cur3".toCharArray());
+
+		byte [] encMessageBytes = CryptoUtil.asymCipher(plainText.getBytes(), privateKey);
+		
+		byte[] decodMessageBytes = CryptoUtil.asymDecipher(encMessageBytes, privateKey);
+		assertNull(decodMessageBytes);
 	}
 }

@@ -72,8 +72,7 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 						try {
 							ca = new CAClient("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca?WSDL");
 						} catch (CAClientException e) {
-							System.out.println("Could not connect to certification authority");
-							return false;
+							throw new RuntimeException("Could not connect to certification authority");
 						}
 
 						String certificateString = ca.getCertificate("A24_Mediator");
@@ -86,8 +85,7 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 							certFactory = CertificateFactory.getInstance("X.509");
 							certificate = certFactory.generateCertificate(in);
 						} catch (CertificateException e) {
-							System.out.println("Could not generate certificate");
-							return false;
+							throw new RuntimeException("Could not generate certificate");
 						}
 
 						//verify the certificate with CA help
@@ -97,28 +95,23 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 							caCertificate = certFactory.generateCertificate(inputStream);
 							certificate.verify(caCertificate.getPublicKey());
 						} catch (CertificateException | NoSuchAlgorithmException e) {
-							System.out.println("Could not generate certificate.");
-							return false;
+							throw new RuntimeException("Could not generate certificate.");
 						} catch (InvalidKeyException e) {
-							System.out.println("Could not get authority public key.");
-							return false;
+							throw new RuntimeException("Could not get authority public key.");
 						} catch (NoSuchProviderException e) {
-							System.out.println("Provider not found.");
-							return false;
+							throw new RuntimeException("Provider not found.");
 						} catch (SignatureException e) {
-							System.out.println("Certificate verification failed.");
-							return false;
+							throw new RuntimeException("Certificate verification failed.");
 						}
 
 						byte[] encryptedCC = CryptoUtil.asymCipher(DatatypeConverter.parseBase64Binary(ccString), certificate.getPublicKey());
 						if (encryptedCC == null)
-							return false;
+							throw new RuntimeException("Could not encrypt the credit card.");
 						n.setTextContent(DatatypeConverter.printBase64Binary(encryptedCC));
 					}
 				}
 			} catch (SOAPException e) {
-				System.out.println("Problem with SOAP message.");
-				return false;
+				throw new RuntimeException("Problem with SOAP message.");
 			}
 		}else{
 			SOAPMessage soapMessage = context.getMessage();
@@ -139,29 +132,24 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 							keystore.load(inputStream, "f19Ho2MJ".toCharArray());
 							key = (PrivateKey) keystore.getKey("a24_mediator", "f19Ho2MJ".toCharArray());
 						} catch (KeyStoreException e) {
-							System.out.println("Failed to load keystore.");
-							return false;
+							throw new RuntimeException("Failed to load keystore.");
 						} catch (CertificateException | NoSuchAlgorithmException e) {
-							System.out.println("Could not load keystore certificates");
-							return false;
+							throw new RuntimeException("Could not load keystore certificates");
 						} catch (IOException e) {
-							System.out.println("Failed to load keystore");
-							return false;
+							throw new RuntimeException("Failed to load keystore");
 						} catch (UnrecoverableKeyException e) {
-							System.out.println("Could not recover private key from keystore");
-							return false;
+							throw new RuntimeException("Could not recover private key from keystore");
 						}
 
 						byte [] cc = CryptoUtil.asymDecipher(DatatypeConverter.parseBase64Binary(ccEnc), key);
 						if (cc == null)
-							return false;
+							throw new RuntimeException("Could not decrypt the credit card.");
 
 						n.setTextContent(DatatypeConverter.printBase64Binary(cc));
 					}
 				}
 			} catch (SOAPException e) {
-				System.out.println("Problem with SOAP message.");
-				return false;
+				throw new RuntimeException("Problem with SOAP message.");
 			}
 		}
 		return true;
