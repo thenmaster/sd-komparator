@@ -158,11 +158,10 @@ public class BuyProductIT extends BaseIT {
 	public void buyProductTooManyTest() throws Exception {
 		client.buyProduct("Z3", 40);
 	}
-	
+
 	@Test
 	public void hackTest() throws Exception {
 		client.buyProduct("Z5", 30);
-
 	}
 
 }
