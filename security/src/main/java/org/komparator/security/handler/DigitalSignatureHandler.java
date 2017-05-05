@@ -55,10 +55,6 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		if (outbound){
-			if (System.getProperty("ServiceGet") != null){
-				System.out.println("Outbound messages to server are not signed.");
-				return true;
-			}
 			SOAPMessage soapMessage = context.getMessage();
 			SOAPPart soapPart = soapMessage.getSOAPPart();
 			try {
@@ -69,14 +65,20 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 
 				Name name = soapEnvelop.createName("Signature", "s", "http://sig");
 				SOAPHeaderElement element = soapHeader.addHeaderElement(name);
+				
+				String filename = null;
+				if (System.getProperty("Service") == null)
+					filename = "A24_Mediator";
+				else
+					filename = System.getProperty("Service");
 
-				InputStream inputStream = this.getClass().getResourceAsStream("/" + System.getProperty("Service") + ".jks");
+				InputStream inputStream = this.getClass().getResourceAsStream("/" + filename + ".jks");
 				PrivateKey privateKey = null;
 
 				try {
 					KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
 					keystore.load(inputStream, "f19Ho2MJ".toCharArray());
-					privateKey = (PrivateKey) keystore.getKey(System.getProperty("Service").toLowerCase(), "f19Ho2MJ".toCharArray());
+					privateKey = (PrivateKey) keystore.getKey(filename.toLowerCase(), "f19Ho2MJ".toCharArray());
 				} catch (KeyStoreException | NoSuchAlgorithmException e) {
 					System.out.println("Could not access keystore.");
 					return false;
@@ -90,7 +92,6 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					System.out.println("Key does not exist.");
 					return false;
 				}
-
 				String signatureString = CryptoUtil.createSignature(soapMessage.getSOAPBody().getTextContent(), privateKey);
 				if (signatureString == null)
 					return false;
@@ -101,10 +102,6 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				return false;
 			}
 		}else{
-			if (System.getProperty("ServiceGet") == null){
-				System.out.println("Inbound messages from client are not validated.");
-				return true;
-			}
 			SOAPMessage soapMessage = context.getMessage();
 			SOAPPart soapPart = soapMessage.getSOAPPart();
 			try {
@@ -134,8 +131,14 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					System.out.println("Could not connect to certificate authority.");
 					return false;
 				}
+				
+				String filename = null;
+				if (System.getProperty("Service") != null)
+					filename = "A24_Mediator";
+				else
+					filename = System.getProperty("ServiceGet");
 
-				String certString = ca.getCertificate(System.getProperty("ServiceGet"));
+				String certString = ca.getCertificate(filename);
 				byte[] bytes = certString.getBytes(StandardCharsets.UTF_8);
 				CertificateFactory certFactory = null;
 				Certificate certificate = null;
