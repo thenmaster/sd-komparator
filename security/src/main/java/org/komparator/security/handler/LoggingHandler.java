@@ -17,10 +17,6 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
  */
 public class LoggingHandler implements SOAPHandler<SOAPMessageContext> {
 
-	//
-	// Handler interface implementation
-	//
-
 	/**
 	 * Gets the header blocks that can be processed by this Handler instance. If
 	 * null, processes all.

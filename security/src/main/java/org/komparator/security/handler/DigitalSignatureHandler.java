@@ -15,7 +15,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -60,24 +59,24 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				System.out.println("Outbound messages to server are not signed.");
 				return true;
 			}
-			SOAPMessage msg = context.getMessage();
-			SOAPPart sp = msg.getSOAPPart();
+			SOAPMessage soapMessage = context.getMessage();
+			SOAPPart soapPart = soapMessage.getSOAPPart();
 			try {
-				SOAPEnvelope se = sp.getEnvelope();
-				SOAPHeader sh = se.getHeader();
-				if (sh == null)
-					sh = se.addHeader();
+				SOAPEnvelope soapEnvelop = soapPart.getEnvelope();
+				SOAPHeader soapHeader = soapEnvelop.getHeader();
+				
+				if (soapHeader == null) soapHeader = soapEnvelop.addHeader();
 
-				Name name = se.createName("Signature", "s", "http://sig");
-				SOAPHeaderElement element = sh.addHeaderElement(name);
+				Name name = soapEnvelop.createName("Signature", "s", "http://sig");
+				SOAPHeaderElement element = soapHeader.addHeaderElement(name);
 
-				InputStream is = this.getClass().getResourceAsStream("/" + System.getProperty("Service") + ".jks");
-				PrivateKey key = null;
+				InputStream inputStream = this.getClass().getResourceAsStream("/" + System.getProperty("Service") + ".jks");
+				PrivateKey privateKey = null;
 
 				try {
 					KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-					keystore.load(is, "f19Ho2MJ".toCharArray());
-					key = (PrivateKey) keystore.getKey(System.getProperty("Service").toLowerCase(), "f19Ho2MJ".toCharArray());
+					keystore.load(inputStream, "f19Ho2MJ".toCharArray());
+					privateKey = (PrivateKey) keystore.getKey(System.getProperty("Service").toLowerCase(), "f19Ho2MJ".toCharArray());
 				} catch (KeyStoreException | NoSuchAlgorithmException e) {
 					System.out.println("Could not access keystore.");
 					return false;
@@ -92,10 +91,10 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					return false;
 				}
 
-				String sigString = CryptoUtil.createSignature(msg.getSOAPBody().getTextContent(),key);
-				if (sigString == null)
+				String signatureString = CryptoUtil.createSignature(soapMessage.getSOAPBody().getTextContent(), privateKey);
+				if (signatureString == null)
 					return false;
-				element.addTextNode(sigString);
+				element.addTextNode(signatureString);
 
 			} catch (SOAPException e) {
 				System.out.println("Problem with SOAP message.");
@@ -106,30 +105,29 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				System.out.println("Inbound messages from client are not validated.");
 				return true;
 			}
-			SOAPMessage msg = context.getMessage();
-			SOAPPart sp = msg.getSOAPPart();
+			SOAPMessage soapMessage = context.getMessage();
+			SOAPPart soapPart = soapMessage.getSOAPPart();
 			try {
-				SOAPEnvelope se = sp.getEnvelope();
-				SOAPHeader sh = se.getHeader();
+				SOAPEnvelope soapEnvelop = soapPart.getEnvelope();
+				SOAPHeader soapHeader = soapEnvelop.getHeader();
 
 				// check header
-				if (sh == null) {
+				if (soapHeader == null) {
 					System.out.println("Header not found.");
 					return false;
 				}
 
-				Name name = se.createName("Signature", "s", "http://sig");
-				@SuppressWarnings("rawtypes")
-				Iterator it =  sh.getChildElements(name);
+				Name name = soapEnvelop.createName("Signature", "s", "http://sig");
 
-				if (!it.hasNext()) {
+				if (!soapHeader.getChildElements(name).hasNext()) {
 					System.out.println("Header element not found.");
 					return false;
 				}
 
-				SOAPElement element = (SOAPElement) it.next();
+				SOAPElement element = (SOAPElement) soapHeader.getChildElements(name).next();
 				String signatureString = element.getValue();
 				CAClient ca = null;
+				
 				try {
 					ca = new CAClient("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca?WSDL");
 				} catch (CAClientException e) {
@@ -138,14 +136,13 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				}
 
 				String certString = ca.getCertificate(System.getProperty("ServiceGet"));
-
 				byte[] bytes = certString.getBytes(StandardCharsets.UTF_8);
-				InputStream in = new ByteArrayInputStream(bytes);
 				CertificateFactory certFactory = null;
-				Certificate cert = null;
+				Certificate certificate = null;
+				
 				try {
 					certFactory = CertificateFactory.getInstance("X.509");
-					cert = certFactory.generateCertificate(in);
+					certificate = certFactory.generateCertificate(new ByteArrayInputStream(bytes));
 				} catch (CertificateException e) {
 					System.out.println("Could not generate certificate.");
 					return false;
@@ -156,7 +153,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				Certificate caCert = null;
 				try {
 					caCert = certFactory.generateCertificate(is);
-					cert.verify(caCert.getPublicKey());
+					certificate.verify(caCert.getPublicKey());
 				} catch (CertificateException e) {
 					System.out.println("Could not generate certificate from authority.");
 					return false;
@@ -171,7 +168,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					return false;
 				}
 
-				if (!(CryptoUtil.verifySignature(signatureString, msg.getSOAPBody().getTextContent(), cert.getPublicKey()))){
+				if (!(CryptoUtil.verifySignature(signatureString, soapMessage.getSOAPBody().getTextContent(), certificate.getPublicKey()))){
 					System.out.println("Message signature is incorrect.");
 					return false;
 				}

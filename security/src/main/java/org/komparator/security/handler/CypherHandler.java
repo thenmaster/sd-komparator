@@ -58,14 +58,14 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		if (outbound){
-			SOAPMessage msg = context.getMessage();
-			SOAPPart sp = msg.getSOAPPart();
+			SOAPMessage soapMessage = context.getMessage();
+			SOAPPart soapPart = soapMessage.getSOAPPart();
 			try {
-				SOAPEnvelope se = sp.getEnvelope();
-				SOAPBody sb = se.getBody();
-				NodeList nl = sb.getFirstChild().getChildNodes();
-				for (int i = 0; i < nl.getLength(); i++) {
-					Node n = nl.item(i);
+				SOAPEnvelope soapEnvelop = soapPart.getEnvelope();
+				SOAPBody soapBody = soapEnvelop.getBody();
+				NodeList nodeList = soapBody.getFirstChild().getChildNodes();
+				for (int i = 0; i < nodeList.getLength(); i++) {
+					Node n = nodeList.item(i);
 					if (n.getNodeName().equals("creditCardNr")){
 						String ccString = n.getTextContent();
 						CAClient ca = null;
@@ -76,26 +76,26 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 							return false;
 						}
 
-						String certString = ca.getCertificate("A24_Mediator");
-						byte[] bytes = certString.getBytes(StandardCharsets.UTF_8);
+						String certificateString = ca.getCertificate("A24_Mediator");
+						byte[] bytes = certificateString.getBytes(StandardCharsets.UTF_8);
 						InputStream in = new ByteArrayInputStream(bytes);
 						CertificateFactory certFactory = null;
-						Certificate cert = null;
+						Certificate certificate = null;
 
 						try {
 							certFactory = CertificateFactory.getInstance("X.509");
-							cert = certFactory.generateCertificate(in);
+							certificate = certFactory.generateCertificate(in);
 						} catch (CertificateException e) {
 							System.out.println("Could not generate certificate");
 							return false;
 						}
 
 						//verify the certificate with CA help
-						InputStream is = this.getClass().getResourceAsStream("/ca.cer");
-						Certificate caCert = null;
+						InputStream inputStream = this.getClass().getResourceAsStream("/ca.cer");
+						Certificate caCertificate = null;
 						try {
-							caCert = certFactory.generateCertificate(is);
-							cert.verify(caCert.getPublicKey());
+							caCertificate = certFactory.generateCertificate(inputStream);
+							certificate.verify(caCertificate.getPublicKey());
 						} catch (CertificateException | NoSuchAlgorithmException e) {
 							System.out.println("Could not generate certificate.");
 							return false;
@@ -110,11 +110,10 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 							return false;
 						}
 
-						byte[] encCC = CryptoUtil.asymCipher(DatatypeConverter.parseBase64Binary(ccString), cert.getPublicKey());
-						if (encCC == null)
+						byte[] encryptedCC = CryptoUtil.asymCipher(DatatypeConverter.parseBase64Binary(ccString), certificate.getPublicKey());
+						if (encryptedCC == null)
 							return false;
-						String encCCString = DatatypeConverter.printBase64Binary(encCC);
-						n.setTextContent(encCCString);
+						n.setTextContent(DatatypeConverter.printBase64Binary(encryptedCC));
 					}
 				}
 			} catch (SOAPException e) {
@@ -122,22 +121,22 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 				return false;
 			}
 		}else{
-			SOAPMessage msg = context.getMessage();
-			SOAPPart sp = msg.getSOAPPart();
+			SOAPMessage soapMessage = context.getMessage();
+			SOAPPart soapPart = soapMessage.getSOAPPart();
 			try {
-				SOAPEnvelope se = sp.getEnvelope();
-				SOAPBody sb = se.getBody();
-				NodeList nl = sb.getFirstChild().getChildNodes();
-				for (int i = 0; i < nl.getLength(); i++) {
-					Node n = nl.item(i);
+				SOAPEnvelope soapEnvelop = soapPart.getEnvelope();
+				SOAPBody soapBody = soapEnvelop.getBody();
+				NodeList nodeList = soapBody.getFirstChild().getChildNodes();
+				for (int i = 0; i < nodeList.getLength(); i++) {
+					Node n = nodeList.item(i);
 					if (n.getNodeName().equals("creditCardNr")){
 						String ccEnc = n.getTextContent();
-						InputStream is = this.getClass().getResourceAsStream("/A24_Mediator.jks");
+						InputStream inputStream = this.getClass().getResourceAsStream("/A24_Mediator.jks");
 						PrivateKey key = null;
 
 						try {
 							KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-							keystore.load(is, "f19Ho2MJ".toCharArray());
+							keystore.load(inputStream, "f19Ho2MJ".toCharArray());
 							key = (PrivateKey) keystore.getKey("a24_mediator", "f19Ho2MJ".toCharArray());
 						} catch (KeyStoreException e) {
 							System.out.println("Failed to load keystore.");
@@ -156,8 +155,8 @@ public class CypherHandler implements SOAPHandler<SOAPMessageContext> {
 						byte [] cc = CryptoUtil.asymDecipher(DatatypeConverter.parseBase64Binary(ccEnc), key);
 						if (cc == null)
 							return false;
-						String ccString = DatatypeConverter.printBase64Binary(cc);
-						n.setTextContent(ccString);
+
+						n.setTextContent(DatatypeConverter.printBase64Binary(cc));
 					}
 				}
 			} catch (SOAPException e) {
