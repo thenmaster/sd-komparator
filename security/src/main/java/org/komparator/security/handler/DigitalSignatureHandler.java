@@ -80,26 +80,21 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					keystore.load(inputStream, "f19Ho2MJ".toCharArray());
 					privateKey = (PrivateKey) keystore.getKey(filename.toLowerCase(), "f19Ho2MJ".toCharArray());
 				} catch (KeyStoreException | NoSuchAlgorithmException e) {
-					System.out.println("Could not access keystore.");
-					return false;
+					throw new RuntimeException("Could not access keystore.");
 				} catch (CertificateException e) {
-					System.out.println("Could not load keystore certificates.");
-					return false;
+					throw new RuntimeException("Could not load keystore certificates.");
 				} catch (IOException e) {
-					System.out.println("Invalid keystore filepath.");
-					return false;
+					throw new RuntimeException("Invalid keystore filepath.");
 				} catch (UnrecoverableKeyException e) {
-					System.out.println("Key does not exist.");
-					return false;
+					throw new RuntimeException("Key does not exist.");
 				}
 				String signatureString = CryptoUtil.createSignature(soapMessage.getSOAPBody().getTextContent(), privateKey);
 				if (signatureString == null)
-					return false;
+					throw new RuntimeException("Signature could not be created.");
 				element.addTextNode(signatureString);
 
 			} catch (SOAPException e) {
-				System.out.println("Problem with SOAP message.");
-				return false;
+				throw new RuntimeException("Problem with SOAP message.");
 			}
 		}else{
 			SOAPMessage soapMessage = context.getMessage();
@@ -110,15 +105,13 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 
 				// check header
 				if (soapHeader == null) {
-					System.out.println("Header not found.");
-					return false;
+					throw new RuntimeException("Header not found.");
 				}
 
 				Name name = soapEnvelop.createName("Signature", "s", "http://sig");
 
 				if (!soapHeader.getChildElements(name).hasNext()) {
-					System.out.println("Header element not found.");
-					return false;
+					throw new RuntimeException("Header element not found.");
 				}
 
 				SOAPElement element = (SOAPElement) soapHeader.getChildElements(name).next();
@@ -128,8 +121,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 				try {
 					ca = new CAClient("http://sec.sd.rnl.tecnico.ulisboa.pt:8081/ca?WSDL");
 				} catch (CAClientException e) {
-					System.out.println("Could not connect to certificate authority.");
-					return false;
+					throw new RuntimeException("Could not connect to certificate authority.");
 				}
 				
 				String filename = null;
@@ -147,8 +139,7 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					certFactory = CertificateFactory.getInstance("X.509");
 					certificate = certFactory.generateCertificate(new ByteArrayInputStream(bytes));
 				} catch (CertificateException e) {
-					System.out.println("Could not generate certificate.");
-					return false;
+					throw new RuntimeException("Could not generate certificate.");
 				}
 
 				//verify the certificate with CA help
@@ -158,27 +149,21 @@ public class DigitalSignatureHandler implements SOAPHandler<SOAPMessageContext> 
 					caCert = certFactory.generateCertificate(is);
 					certificate.verify(caCert.getPublicKey());
 				} catch (CertificateException e) {
-					System.out.println("Could not generate certificate from authority.");
-					return false;
+					throw new RuntimeException("Could not generate certificate from authority.");
 				} catch (InvalidKeyException | NoSuchAlgorithmException e) {
-					System.out.println("Could not get authority public key.");
-					return false;
+					throw new RuntimeException("Could not get authority public key.");
 				} catch (NoSuchProviderException e) {
-					System.out.println("Provider does not exist.");
-					return false;
+					throw new RuntimeException("Provider does not exist.");
 				} catch (SignatureException e) {
-					System.out.println("Certificate verification failed.");
-					return false;
+					throw new RuntimeException("Certificate verification failed.");
 				}
 
 				if (!(CryptoUtil.verifySignature(signatureString, soapMessage.getSOAPBody().getTextContent(), certificate.getPublicKey()))){
-					System.out.println("Message signature is incorrect.");
-					return false;
+					throw new RuntimeException("Message signature is incorrect.");
 				}
 
 			} catch (SOAPException e) {
-				System.out.println("Problem with SOAP message.");
-				return false;
+				throw new RuntimeException("Problem with SOAP message.");
 			}
 		}
 		return true;
