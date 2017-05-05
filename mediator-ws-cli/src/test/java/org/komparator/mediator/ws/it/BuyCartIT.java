@@ -302,5 +302,18 @@ public class BuyCartIT extends BaseIT {
 		assertEquals(0, shpResViews[1].getPurchasedItems().size());
 		assertEquals(0, shpResViews[1].getTotalPrice());
 	}
+	
+	@Test
+	public void hackableBuy() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception,
+			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+		// -- add products to carts --
+		{
+			ItemIdView id = new ItemIdView();
+			id.setProductId("p4");
+			id.setSupplierId(supplierNames[0]);
+			mediatorClient.addToCart("xyz", id, 1);
+		}
+		mediatorClient.buyCart("xyz", VALID_CC);
+	}
 
 }
