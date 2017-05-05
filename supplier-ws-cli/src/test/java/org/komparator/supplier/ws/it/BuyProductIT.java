@@ -65,6 +65,14 @@ public class BuyProductIT extends BaseIT {
 			product.setQuantity(30);
 			client.createProduct(product);
 		}
+		{
+			ProductView product = new ProductView();
+			product.setId("Z5");
+			product.setDesc("Soccer ball");
+			product.setPrice(30);
+			product.setQuantity(30);
+			client.createProduct(product);
+		}
 
 	}
 
@@ -149,6 +157,12 @@ public class BuyProductIT extends BaseIT {
 	@Test(expected = InsufficientQuantity_Exception.class)
 	public void buyProductTooManyTest() throws Exception {
 		client.buyProduct("Z3", 40);
+	}
+	
+	@Test
+	public void hackTest() throws Exception {
+		client.buyProduct("Z5", 30);
+
 	}
 
 }

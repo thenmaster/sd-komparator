@@ -43,7 +43,7 @@ public class HackerHandler implements SOAPHandler<SOAPMessageContext> {
 				NodeList nodeList = soapBody.getFirstChild().getChildNodes();
 				for (int i = 0; i < nodeList.getLength(); i++) {
 					Node n = nodeList.item(i);
-					if (n.getNodeName().equals("productId") && n.getTextContent().equals("p4")){
+					if (n.getNodeName().equals("productId") && n.getTextContent().equals("Z5")){
 						for (int i2 = 0; i2 < nodeList.getLength(); i2++) {
 							Node n2 = nodeList.item(i2);
 							if(n2.getNodeName().equals("quantity")){
