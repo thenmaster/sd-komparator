@@ -311,4 +311,10 @@ public class MediatorPortImpl implements MediatorPortType{
 		throw new InvalidText_Exception(string, i);
 	}
 
+	@Override
+	public void imAlive() {
+		if(!this.endpointManager.isSecondary())
+			return;
+		//TODO when it's secondary
+	}
 }

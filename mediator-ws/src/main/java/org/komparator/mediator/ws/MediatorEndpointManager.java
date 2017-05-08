@@ -43,6 +43,16 @@ public class MediatorEndpointManager {
 	/** output option **/
 	private boolean verbose = true;
 
+	private boolean secondary = false;
+
+	public boolean isSecondary() {
+		return secondary;
+	}
+
+	public void setSecondary(boolean secondary) {
+		this.secondary = secondary;
+	}
+
 	public boolean isVerbose() {
 		return verbose;
 	}
@@ -124,11 +134,18 @@ public class MediatorEndpointManager {
 		try {
 			// publish to UDDI
 			if (uddiURL != null) {
-				if (verbose) {
-					System.out.printf("Publishing '%s' to UDDI at %s%n", wsName, uddiURL);
-				}
 				uddiNaming = new UDDINaming(uddiURL);
-				uddiNaming.rebind(wsName, wsURL);
+				if(uddiNaming.lookup(wsName) == null){
+					if (verbose) {
+						System.out.printf("Publishing '%s' to UDDI at %s%n as the primary mediator\n", wsName, uddiURL);
+					}
+					uddiNaming.rebind(wsName, wsURL);
+				} else {
+					this.secondary = true;
+					if (verbose) {
+						System.out.printf("Not publishing '%s' to UDDI at %s%n because it's a secondary mediator\n", wsName, uddiURL);
+					}
+				}
 			}
 		} catch (Exception e) {
 			uddiNaming = null;
@@ -147,7 +164,9 @@ public class MediatorEndpointManager {
 		try {
 			if (uddiNaming != null) {
 				// delete from UDDI
-				uddiNaming.unbind(wsName);
+				if (!secondary){
+					uddiNaming.unbind(wsName);
+				}
 				if (verbose) {
 					System.out.printf("Unpublished '%s' from UDDI%n", wsName);
 				}

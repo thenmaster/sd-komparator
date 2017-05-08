@@ -19,11 +19,19 @@
 
         <mainclass>org.komparator.mediator.ws.MediatorApp</mainclass>
 
+
+		<group.id>A24</group.id>
+	    <ws.i>1</ws.i>
+	
+	    <ws.host>localhost</ws.host>
+	    <ws.port>807${ws.i}</ws.port>
+	    <ws.url>http://${ws.host}:${ws.port}/mediator-ws/endpoint</ws.url>
+	   
+	    <ws.name>${group.id}_Mediator</ws.name>
+
         <uddi.url>http://a24:f19Ho2MJ@uddi.sd.rnl.tecnico.ulisboa.pt:9090</uddi.url>
         <uddi.user>a24</uddi.user>
         <uddi.pass>f19Ho2MJ</uddi.pass>
-        <ws.name>A24_Mediator</ws.name>
-        <ws.url>http://localhost:8080/mediator-ws/endpoint</ws.url>
     </properties>
 
     <dependencies>
