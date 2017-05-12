@@ -5,7 +5,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.komparator.mediator.ws.CartItemView;
 import org.komparator.mediator.ws.InvalidCartId_Exception;
+import org.komparator.mediator.ws.ShoppingResultView;
 import org.komparator.supplier.ws.BadProductId_Exception;
 import org.komparator.supplier.ws.BadQuantity_Exception;
 import org.komparator.supplier.ws.InsufficientQuantity_Exception;
@@ -89,6 +91,26 @@ public class Mediator {
 		this.carts.clear();
 		this.purchases.clear();
 		this.counter.set(1);
+	}
+
+	public void updateShopHistory(ShoppingResultView srv){
+		ShoppingResult sr = new ShoppingResult();
+		sr.setId(srv.getId());
+		sr.setPrice(srv.getTotalPrice());
+		for (CartItemView civ : srv.getPurchasedItems()) {
+			sr.addPurchased(new CartItem(civ.getItem().getItemId().getProductId(), civ.getItem().getItemId().getSupplierId(), civ.getItem().getDesc(), civ.getItem().getPrice(), civ.getQuantity()));
+		}
+		for (CartItemView civ : srv.getDroppedItems()) {
+			sr.addNotPurchased(new CartItem(civ.getItem().getItemId().getProductId(), civ.getItem().getItemId().getSupplierId(), civ.getItem().getDesc(), civ.getItem().getPrice(), civ.getQuantity()));
+		}
+		this.purchases.put(sr.getId(), sr);
+	}
+
+	public void updateCart(String id, CartItemView civ){
+		if(!this.carts.containsKey(id))
+			this.addCart(id);
+		Cart c = this.carts.get(id);
+		c.addItem(new CartItem(civ.getItem().getItemId().getProductId(), civ.getItem().getItemId().getSupplierId(), civ.getItem().getDesc(), civ.getItem().getPrice(), civ.getQuantity()));
 	}
 
 }

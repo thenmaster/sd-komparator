@@ -12,6 +12,7 @@ import org.komparator.mediator.domain.Cart;
 import org.komparator.mediator.domain.CartItem;
 import org.komparator.mediator.domain.Mediator;
 import org.komparator.mediator.domain.ShoppingResult;
+import org.komparator.mediator.ws.cli.MediatorClient;
 import org.komparator.supplier.ws.BadProductId_Exception;
 import org.komparator.supplier.ws.BadText_Exception;
 import org.komparator.supplier.ws.ProductView;
@@ -38,8 +39,17 @@ public class MediatorPortImpl implements MediatorPortType{
 	// end point manager
 	private MediatorEndpointManager endpointManager;
 
+	private MediatorClient secondaryLink = null;
+
 	public MediatorPortImpl(MediatorEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
+		if (!this.endpointManager.isSecondary())
+			try {
+				this.secondaryLink = new MediatorClient("http://localhost:8072/mediator-ws/endpoint");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 
 	// Main operations -------------------------------------------------------
@@ -134,6 +144,10 @@ public class MediatorPortImpl implements MediatorPortType{
 
 		ShoppingResult sr = m.buyCart(this.endpointManager.getUddiURL(), cartId);
 
+		if (!this.endpointManager.isSecondary()){
+			this.secondaryLink.updateShopHistory(this.newShoppingResultView(sr));
+		}
+
 		return this.newShoppingResultView(sr);
 	}
 
@@ -164,7 +178,10 @@ public class MediatorPortImpl implements MediatorPortType{
 			}
 
 			if(itemQty+initialQuantity <= p.getQuantity()){
-				m.addItem(cartId,new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty));
+				CartItem ci = new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty);
+				m.addItem(cartId,ci);
+				if(!this.endpointManager.isSecondary())
+					this.secondaryLink.updateCart(cartId, this.newCartItemView(ci));
 				return;
 			}
 			this.notEnoughItemsExceptionHelper("Too much quantity asked!");
@@ -319,14 +336,13 @@ public class MediatorPortImpl implements MediatorPortType{
 	}
 
 	@Override
-	public void updateShopHistory() {
-		// TODO Auto-generated method stub
-		
+	public void updateShopHistory(ShoppingResultView shopResult) {
+		Mediator.getInstance().updateShopHistory(shopResult);
 	}
 
 	@Override
-	public void updateCart() {
-		// TODO Auto-generated method stub
-		
+	public void updateCart(String cartId, CartItemView itemId) {
+		Mediator.getInstance().updateCart(cartId, itemId);
 	}
+
 }

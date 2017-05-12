@@ -5,10 +5,25 @@ import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceException;
 
-import org.komparator.mediator.ws.*;
+import org.komparator.mediator.ws.CartItemView;
+import org.komparator.mediator.ws.CartView;
+import org.komparator.mediator.ws.EmptyCart_Exception;
+import org.komparator.mediator.ws.InvalidCartId_Exception;
+import org.komparator.mediator.ws.InvalidCreditCard_Exception;
+import org.komparator.mediator.ws.InvalidItemId_Exception;
+import org.komparator.mediator.ws.InvalidQuantity_Exception;
+import org.komparator.mediator.ws.InvalidText_Exception;
+import org.komparator.mediator.ws.ItemIdView;
+import org.komparator.mediator.ws.ItemView;
+import org.komparator.mediator.ws.MediatorPortType;
+import org.komparator.mediator.ws.MediatorService;
+import org.komparator.mediator.ws.NotEnoughItems_Exception;
+import org.komparator.mediator.ws.ShoppingResultView;
+
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
 
@@ -71,7 +86,7 @@ public class MediatorClient implements MediatorPortType {
     }
 
     private void initializeTimeOut() {
-    	int connectionTimeout = 1000, receiveTimeout = 2000;
+    	int connectionTimeout = 10000, receiveTimeout = 20000;
         BindingProvider bindingProvider = (BindingProvider) port;
         Map<String, Object> requestContext = bindingProvider.getRequestContext();
 
@@ -269,30 +284,30 @@ public class MediatorClient implements MediatorPortType {
 	}
 
 	@Override
-	public void updateShopHistory() {
+	public void updateShopHistory(ShoppingResultView shopResult) {
         try {
-        	port.updateShopHistory();
+        	port.updateShopHistory(shopResult);
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
 			} catch (MediatorClientException e) {
 				return;
 			}
-            port.updateShopHistory();
+            port.updateShopHistory(shopResult);
         }
 	}
 
 	@Override
-	public void updateCart() {
+	public void updateCart(String cartId, CartItemView itemId) {
         try {
-        	port.updateCart();
+        	port.updateCart(cartId, itemId);
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
 			} catch (MediatorClientException e) {
 				return;
 			}
-            port.updateCart();
+            port.updateCart(cartId, itemId);
         }
 	}
 }
