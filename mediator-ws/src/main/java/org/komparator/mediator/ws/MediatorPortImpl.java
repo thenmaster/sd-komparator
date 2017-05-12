@@ -317,4 +317,16 @@ public class MediatorPortImpl implements MediatorPortType{
 			this.endpointManager.updateLastAliveDate();
 		}
 	}
+
+	@Override
+	public void updateShopHistory() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateCart() {
+		// TODO Auto-generated method stub
+		
+	}
 }
