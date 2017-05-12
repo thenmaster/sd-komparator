@@ -302,4 +302,53 @@ public class BuyCartIT extends BaseIT {
 		assertEquals(0, shpResViews[1].getPurchasedItems().size());
 		assertEquals(0, shpResViews[1].getTotalPrice());
 	}
+	
+	@Test
+	public void testPrimaryMediatorFail() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception,
+			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+		// -- add products to carts --
+		{
+			ItemIdView id = new ItemIdView();
+			id.setProductId("p1");
+			id.setSupplierId(supplierNames[0]);
+			mediatorClient.addToCart("xyz", id, 2);
+		}
+
+		{
+			ItemIdView id = new ItemIdView();
+			id.setProductId("p1");
+			id.setSupplierId(supplierNames[1]);
+			mediatorClient.addToCart("xyz", id, 1);
+		}
+
+		{
+			ItemIdView id = new ItemIdView();
+			id.setProductId("p2");
+			id.setSupplierId(supplierNames[0]);
+			mediatorClient.addToCart("xyz", id, 3);
+		}
+
+		{ // product in other cart! (will not try to buy this)
+			ItemIdView id = new ItemIdView();
+			id.setProductId("p1");
+			id.setSupplierId(supplierNames[1]);
+			mediatorClient.addToCart("DoNotBuyMe", id, 1);
+		}
+		
+		System.out.println("Im gonna sleep!!!! KILL ME");
+		try {
+			Thread.sleep(20000);
+		} catch (InterruptedException e) {
+			System.out.println("Cant sleep.");
+		}
+
+		// -- buy a cart
+		ShoppingResultView shpResView = mediatorClient.buyCart("xyz", VALID_CC);
+		assertNotNull(shpResView.getId());
+		assertEquals(Result.COMPLETE, shpResView.getResult());
+		assertEquals(0, shpResView.getDroppedItems().size());
+		assertEquals(3, shpResView.getPurchasedItems().size());
+		final int expectedTotalPrice = 2 * 3 + 1 * 4 + 3 * 9; // sum(qty*price)
+		assertEquals(expectedTotalPrice, shpResView.getTotalPrice());
+	}
 }

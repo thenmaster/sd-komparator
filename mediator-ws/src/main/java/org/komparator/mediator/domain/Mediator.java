@@ -93,7 +93,8 @@ public class Mediator {
 		this.counter.set(1);
 	}
 
-	public void updateShopHistory(ShoppingResultView srv){
+	public void updateShopHistory(ShoppingResultView srv, String cartId){
+		this.carts.remove(cartId);
 		ShoppingResult sr = new ShoppingResult();
 		sr.setId(srv.getId());
 		sr.setPrice(srv.getTotalPrice());

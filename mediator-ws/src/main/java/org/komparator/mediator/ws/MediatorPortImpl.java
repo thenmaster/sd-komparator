@@ -145,7 +145,7 @@ public class MediatorPortImpl implements MediatorPortType{
 		ShoppingResult sr = m.buyCart(this.endpointManager.getUddiURL(), cartId);
 
 		if (!this.endpointManager.isSecondary()){
-			this.secondaryLink.updateShopHistory(this.newShoppingResultView(sr));
+			this.secondaryLink.updateShopHistory(this.newShoppingResultView(sr), cartId);
 		}
 
 		return this.newShoppingResultView(sr);
@@ -336,8 +336,8 @@ public class MediatorPortImpl implements MediatorPortType{
 	}
 
 	@Override
-	public void updateShopHistory(ShoppingResultView shopResult) {
-		Mediator.getInstance().updateShopHistory(shopResult);
+	public void updateShopHistory(ShoppingResultView shopResult, String cartId) {
+		Mediator.getInstance().updateShopHistory(shopResult, cartId);
 	}
 
 	@Override

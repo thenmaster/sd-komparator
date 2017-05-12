@@ -117,6 +117,7 @@ public class MediatorClient implements MediatorPortType {
 
             if (verbose)
                 System.out.printf("Looking for '%s'%n", wsName);
+            
             wsURL = uddiNaming.lookup(wsName);
 
         } catch (Exception e) {
@@ -160,6 +161,7 @@ public class MediatorClient implements MediatorPortType {
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return;
 			}
@@ -174,6 +176,7 @@ public class MediatorClient implements MediatorPortType {
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return null;
 			}
@@ -188,6 +191,7 @@ public class MediatorClient implements MediatorPortType {
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return null;
 			}
@@ -202,6 +206,7 @@ public class MediatorClient implements MediatorPortType {
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return null;
 			}
@@ -216,6 +221,7 @@ public class MediatorClient implements MediatorPortType {
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return null;
 			}
@@ -228,9 +234,10 @@ public class MediatorClient implements MediatorPortType {
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
         try {
     		return port.buyCart(cartId, creditCardNr);
-        } catch(WebServiceException wse) {
+        } catch(Exception wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return null;
 			}
@@ -246,6 +253,7 @@ public class MediatorClient implements MediatorPortType {
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return;
 			}
@@ -262,6 +270,7 @@ public class MediatorClient implements MediatorPortType {
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return null;
 			}
@@ -271,29 +280,21 @@ public class MediatorClient implements MediatorPortType {
 
 	@Override
 	public void imAlive() {
-        try {
-    		port.imAlive();
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-			} catch (MediatorClientException e) {
-				return;
-			}
-    		port.imAlive();
-        }
+    	port.imAlive();
 	}
 
 	@Override
-	public void updateShopHistory(ShoppingResultView shopResult) {
+	public void updateShopHistory(ShoppingResultView shopResult, String cartId) {
         try {
-        	port.updateShopHistory(shopResult);
+        	port.updateShopHistory(shopResult, cartId);
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return;
 			}
-            port.updateShopHistory(shopResult);
+            port.updateShopHistory(shopResult, cartId);
         }
 	}
 
@@ -304,6 +305,7 @@ public class MediatorClient implements MediatorPortType {
         } catch(WebServiceException wse) {
             try {
 				uddiLookup();
+				createStub();
 			} catch (MediatorClientException e) {
 				return;
 			}
