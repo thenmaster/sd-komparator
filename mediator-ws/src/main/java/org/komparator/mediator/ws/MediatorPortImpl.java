@@ -313,8 +313,8 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	@Override
 	public void imAlive() {
-		if(!this.endpointManager.isSecondary())
-			return;
-		//TODO when it's secondary
+		if(this.endpointManager.isSecondary()){
+			this.endpointManager.updateLastAliveDate();
+		}
 	}
 }

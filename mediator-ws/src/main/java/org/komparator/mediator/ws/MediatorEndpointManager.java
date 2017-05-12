@@ -1,6 +1,7 @@
 package org.komparator.mediator.ws;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import javax.xml.ws.Endpoint;
 
@@ -8,6 +9,23 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
 /** End point manager */
 public class MediatorEndpointManager {
+	
+	private String wsPort = "8071";
+	public String getWsPort() {
+		return wsPort;
+	}
+	public void setWsPort(String wsPort) {
+		this.wsPort = wsPort;
+	}
+
+	private LocalDateTime lastAliveDate = null;
+	
+	public LocalDateTime getLastAliveDate() {
+		return lastAliveDate;
+	}
+	public void updateLastAliveDate(){
+		this.lastAliveDate = LocalDateTime.now();
+	}
 
 	/** UDDI naming server location */
 	private String uddiURL = null;
@@ -135,15 +153,15 @@ public class MediatorEndpointManager {
 			// publish to UDDI
 			if (uddiURL != null) {
 				uddiNaming = new UDDINaming(uddiURL);
-				if(uddiNaming.lookup(wsName) == null){
+				if(wsURL.contains(wsPort)){
 					if (verbose) {
-						System.out.printf("Publishing '%s' to UDDI at %s%n as the primary mediator\n", wsName, uddiURL);
+						System.out.printf("Publishing '%s' to UDDI at %s as the primary mediator\n", wsName, uddiURL);
 					}
 					uddiNaming.rebind(wsName, wsURL);
 				} else {
 					this.secondary = true;
 					if (verbose) {
-						System.out.printf("Not publishing '%s' to UDDI at %s%n because it's a secondary mediator\n", wsName, uddiURL);
+						System.out.printf("Not publishing '%s' to UDDI at %s because it's a secondary mediator\n", wsName, uddiURL);
 					}
 				}
 			}
@@ -166,9 +184,9 @@ public class MediatorEndpointManager {
 				// delete from UDDI
 				if (!secondary){
 					uddiNaming.unbind(wsName);
-				}
-				if (verbose) {
-					System.out.printf("Unpublished '%s' from UDDI%n", wsName);
+					if (verbose) {
+						System.out.printf("Unpublished '%s' from UDDI%n", wsName);
+					}
 				}
 				uddiNaming = null;
 			}

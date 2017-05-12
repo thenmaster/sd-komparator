@@ -63,6 +63,12 @@
         	<artifactId>security</artifactId>
         	<version>1.0-SNAPSHOT</version>
     	</dependency>
+    	<!-- MEDIATOR-CLI -->
+    	<dependency>
+        	<groupId>org.komparator.A24</groupId>
+        	<artifactId>mediator-ws-cli</artifactId>
+        	<version>1.0-SNAPSHOT</version>
+    	</dependency>
     </dependencies>
 
     <build>

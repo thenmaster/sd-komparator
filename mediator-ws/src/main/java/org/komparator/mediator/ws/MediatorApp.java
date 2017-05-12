@@ -12,6 +12,7 @@ public class MediatorApp {
 		String uddiURL = null;
 		String wsName = null;
 		String wsURL = null;
+		LifeProof lifeProof = null;
 
 		// Create server implementation object, according to options
 		MediatorEndpointManager endpoint = null;
@@ -28,9 +29,14 @@ public class MediatorApp {
 
 		try {
 			endpoint.start();
-			endpoint.awaitConnections();
+			lifeProof = new LifeProof(endpoint);
+			synchronized(lifeProof){
+				lifeProof.start();
+				endpoint.awaitConnections();
+			}
 		} finally {
 			endpoint.stop();
+			lifeProof.terminate();
 		}
 
 	}
