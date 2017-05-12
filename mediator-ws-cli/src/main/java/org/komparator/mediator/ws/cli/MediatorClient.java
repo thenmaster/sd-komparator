@@ -2,28 +2,13 @@ package org.komparator.mediator.ws.cli;
 
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.ws.BindingProvider;
+import javax.xml.ws.WebServiceException;
 
-import org.komparator.mediator.ws.CartView;
-import org.komparator.mediator.ws.EmptyCart_Exception;
-import org.komparator.mediator.ws.InvalidCartId_Exception;
-import org.komparator.mediator.ws.InvalidCreditCard_Exception;
-import org.komparator.mediator.ws.InvalidItemId_Exception;
-import org.komparator.mediator.ws.InvalidQuantity_Exception;
-import org.komparator.mediator.ws.InvalidText_Exception;
-import org.komparator.mediator.ws.ItemIdView;
-import org.komparator.mediator.ws.ItemView;
-import org.komparator.mediator.ws.MediatorPortType;
-import org.komparator.mediator.ws.MediatorService;
-import org.komparator.mediator.ws.NotEnoughItems_Exception;
-import org.komparator.mediator.ws.ShoppingResultView;
-
-// TODO uncomment after generate-sources
-//import org.komparator.mediator.ws.*;
-
+import org.komparator.mediator.ws.*;
 import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
 
 
@@ -73,6 +58,7 @@ public class MediatorClient implements MediatorPortType {
     public MediatorClient(String wsURL) throws MediatorClientException {
         this.wsURL = wsURL;
         createStub();
+        initializeTimeOut();
     }
 
     /** constructor with provided UDDI location and name */
@@ -81,9 +67,33 @@ public class MediatorClient implements MediatorPortType {
         this.wsName = wsName;
         uddiLookup();
         createStub();
+        initializeTimeOut();
     }
 
-    /** UDDI lookup */
+    private void initializeTimeOut() {
+    	int connectionTimeout = 1000, receiveTimeout = 2000;
+        BindingProvider bindingProvider = (BindingProvider) port;
+        Map<String, Object> requestContext = bindingProvider.getRequestContext();
+
+        final List<String> CONN_TIME_PROPS = new ArrayList<String>();
+        CONN_TIME_PROPS.add("com.sun.xml.ws.connect.timeout");
+        CONN_TIME_PROPS.add("com.sun.xml.internal.ws.connect.timeout");
+        CONN_TIME_PROPS.add("javax.xml.ws.client.connectionTimeout");
+
+        for (String propName : CONN_TIME_PROPS)
+            requestContext.put(propName, connectionTimeout);
+        System.out.printf("Set connection timeout to %d milliseconds%n", connectionTimeout);
+
+        final List<String> RECV_TIME_PROPS = new ArrayList<String>();
+        RECV_TIME_PROPS.add("com.sun.xml.ws.request.timeout");
+        RECV_TIME_PROPS.add("com.sun.xml.internal.ws.request.timeout");
+        RECV_TIME_PROPS.add("javax.xml.ws.client.receiveTimeout");
+
+        for (String propName : RECV_TIME_PROPS)
+            requestContext.put(propName, receiveTimeout);
+	}
+
+	/** UDDI lookup */
     private void uddiLookup() throws MediatorClientException {
         try {
             if (verbose)
@@ -129,49 +139,160 @@ public class MediatorClient implements MediatorPortType {
     // remote invocation methods ----------------------------------------------
 
      @Override
-	 public void clear() {
-		 port.clear();
-	 }
+	public void clear() {
+        try {
+    		port.clear();
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return;
+			}
+    		port.clear();
+        }
+	}
 
      @Override
-	 public String ping(String arg0) {
-		 return port.ping(arg0);
-	 }
+	public String ping(String arg0) {
+        try {
+    		return port.ping(arg0);
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return null;
+			}
+    		return port.ping(arg0);
+        }
+	}
 
      @Override
-	 public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
-		 return port.searchItems(descText);
-	 }
+	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
+        try {
+    		return port.searchItems(descText);
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return null;
+			}
+    		return port.searchItems(descText);
+        }
+	}
 
      @Override
-	 public List<CartView> listCarts() {
-		 return port.listCarts();
-	 }
+	public List<CartView> listCarts() {
+        try {
+    		return port.listCarts();
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return null;
+			}
+    		return port.listCarts();
+        }
+	}
 
-	 @Override
-	 public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
-		 return port.getItems(productId);
-	 }
+	@Override
+	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
+        try {
+    		return port.getItems(productId);
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return null;
+			}
+    		return port.getItems(productId);
+        }
+	}
 
-	 @Override
-	 public ShoppingResultView buyCart(String cartId, String creditCardNr)
-			 throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
-		 return port.buyCart(cartId, creditCardNr);
-	 }
+	@Override
+	public ShoppingResultView buyCart(String cartId, String creditCardNr)
+			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
+        try {
+    		return port.buyCart(cartId, creditCardNr);
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return null;
+			}
+    		return port.buyCart(cartId, creditCardNr);
+        }
+	}
 
-	 @Override
-	 public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
-			 InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-		 port.addToCart(cartId, itemId, itemQty);
-	 }
+	@Override
+	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
+			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+        try {
+			port.addToCart(cartId, itemId, itemQty);
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return;
+			}
+		port.addToCart(cartId, itemId, itemQty);
+        }
 
-	 @Override
-	 public List<ShoppingResultView> shopHistory() {
-		 return port.shopHistory();
-	 }
+
+	}
+
+	@Override
+	public List<ShoppingResultView> shopHistory() {
+        try {
+        	return port.shopHistory();
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return null;
+			}
+            return port.shopHistory();
+        }
+	}
 
 	@Override
 	public void imAlive() {
-		port.imAlive();
+        try {
+    		port.imAlive();
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return;
+			}
+    		port.imAlive();
+        }
+	}
+
+	@Override
+	public void updateShopHistory() {
+        try {
+        	port.updateShopHistory();
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return;
+			}
+            port.updateShopHistory();
+        }
+	}
+
+	@Override
+	public void updateCart() {
+        try {
+        	port.updateCart();
+        } catch(WebServiceException wse) {
+            try {
+				uddiLookup();
+			} catch (MediatorClientException e) {
+				return;
+			}
+            port.updateCart();
+        }
 	}
 }
