@@ -5,8 +5,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
 import org.komparator.mediator.domain.Cart;
 import org.komparator.mediator.domain.CartItem;
@@ -40,6 +43,11 @@ public class MediatorPortImpl implements MediatorPortType{
 	private MediatorEndpointManager endpointManager;
 
 	private MediatorClient secondaryLink = null;
+	
+	private int lastMessageID = 0;
+	
+	@Resource
+	private WebServiceContext wsc;
 
 	public MediatorPortImpl(MediatorEndpointManager endpointManager) {
 		this.endpointManager = endpointManager;
@@ -119,6 +127,8 @@ public class MediatorPortImpl implements MediatorPortType{
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
 		Mediator m = Mediator.getInstance();
+		/*if (!checkMessageID())
+			return this.newShoppingResultView(m.lastBuyMade());*/
 		CreditCardClient cc = null;
 		if(cartId == null)
 			this.invalidCartIdExceptionHelper("Null cart id!");
@@ -154,6 +164,8 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
+		/*if (!checkMessageID())
+			return;*/
 		Mediator m = Mediator.getInstance();
 		if(cartId == null)
 			this.invalidCartIdExceptionHelper("Null cart id!");
@@ -195,6 +207,15 @@ public class MediatorPortImpl implements MediatorPortType{
 	}
 
 	// Auxiliary operations --------------------------------------------------
+	
+	public boolean checkMessageID(){
+		MessageContext mc = wsc.getMessageContext();
+		int propertyValue = (int) mc.get("my.request.id");
+		if (propertyValue <= lastMessageID)
+			return false;
+		lastMessageID = propertyValue;
+		return true;
+	}
 
 	@Override
 	public List<CartView> listCarts() {

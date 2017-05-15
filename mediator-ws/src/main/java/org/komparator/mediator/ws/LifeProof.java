@@ -28,7 +28,7 @@ public class LifeProof extends Thread {
 						System.out.println("No secondary mediator running!");
 					}
 				} else {
-					if (endpoint.getLastAliveDate() != null && Duration.between(endpoint.getLastAliveDate(), LocalDateTime.now()).getSeconds() > 5){
+					if (endpoint.getLastAliveDate() != null && Duration.between(endpoint.getLastAliveDate(), LocalDateTime.now()).getSeconds() > 7){
 						//Secondary assumes primary role
 						endpoint.setWsPort("8072");
 						endpoint.setSecondary(false);

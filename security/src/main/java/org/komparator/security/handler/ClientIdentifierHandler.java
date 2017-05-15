@@ -3,6 +3,13 @@ package org.komparator.security.handler;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
+import javax.xml.soap.Name;
+import javax.xml.soap.SOAPEnvelope;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPHeaderElement;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPPart;
 import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
@@ -10,7 +17,7 @@ import javax.xml.ws.handler.soap.SOAPMessageContext;
 /**
  * This SOAPHandler adds a unique id to messages from the mediator client to the current primary mediator.
  */
-public class IdentifierHandler implements SOAPHandler<SOAPMessageContext> {
+public class ClientIdentifierHandler implements SOAPHandler<SOAPMessageContext> {
 
 	/**
 	 * Gets the header blocks that can be processed by this Handler instance. If
@@ -30,9 +37,28 @@ public class IdentifierHandler implements SOAPHandler<SOAPMessageContext> {
 		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		if (outbound){
-			//TODO add code to add the id
-		}else{
-			//TODO add code to verify the id is new
+			String propertyValue = (String) context.get("my.request.id");
+			try {
+				// get SOAP envelope
+				SOAPMessage msg = context.getMessage();
+				SOAPPart sp = msg.getSOAPPart();
+				SOAPEnvelope se = sp.getEnvelope();
+
+				// add header
+				SOAPHeader sh = se.getHeader();
+				if (sh == null)
+					sh = se.addHeader();
+
+				// add header element (name, namespace prefix, namespace)
+				Name name = se.createName("id", "i", "http://id");
+				SOAPHeaderElement element = sh.addHeaderElement(name);
+
+				// *** #3 ***
+				// add header element value
+				element.addTextNode(propertyValue);
+			} catch (SOAPException e) {
+				System.out.printf("Failed to add SOAP header because of %s%n", e);
+			}
 		}
 		return true;
 	}

@@ -22,6 +22,10 @@ public class Mediator {
 	private Map<String, ShoppingResult> purchases = new ConcurrentHashMap<>();
 
 	private AtomicInteger counter = new AtomicInteger(1); // counter for unique shopping Id's
+	
+	public ShoppingResult lastBuyMade(){
+		return purchases.get(counter.get());
+	}
 
 	private Mediator() {
 	}
