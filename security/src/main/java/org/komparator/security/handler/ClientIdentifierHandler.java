@@ -44,17 +44,16 @@ public class ClientIdentifierHandler implements SOAPHandler<SOAPMessageContext> 
 					SOAPMessage msg = context.getMessage();
 					SOAPPart sp = msg.getSOAPPart();
 					SOAPEnvelope se = sp.getEnvelope();
-	
+
 					// add header
 					SOAPHeader sh = se.getHeader();
 					if (sh == null)
 						sh = se.addHeader();
-	
+
 					// add header element (name, namespace prefix, namespace)
 					Name name = se.createName("id", "i", "http://id");
 					SOAPHeaderElement element = sh.addHeaderElement(name);
-	
-					// *** #3 ***
+
 					// add header element value
 					element.addTextNode(propertyValue);
 				} catch (SOAPException e) {

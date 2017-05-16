@@ -249,6 +249,7 @@ wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
             
             <xs:complexType name="updateShopHistory">
  				<xs:sequence>
+ 					<xs:element name="requestId" type="xs:int"/>
                     <xs:element name="shopResult" type="tns:shoppingResultView" minOccurs="0"/>
                     <xs:element name="cartId" type="xs:string" minOccurs="0"/>
                 </xs:sequence>
@@ -256,6 +257,7 @@ wsdl:service, wsdl:portType, wsdl:types and wsdl:binding below
             
             <xs:complexType name="updateCart">
                  <xs:sequence>
+                 	<xs:element name="requestId" type="xs:int"/>
                     <xs:element name="cartId" type="xs:string" minOccurs="0"/>
                     <xs:element name="itemId" type="tns:cartItemView" minOccurs="0"/>
                 </xs:sequence>

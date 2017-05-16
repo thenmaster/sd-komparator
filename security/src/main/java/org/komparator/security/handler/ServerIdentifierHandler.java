@@ -62,12 +62,9 @@ public class ServerIdentifierHandler implements SOAPHandler<SOAPMessageContext> 
 				}
 				SOAPElement element = (SOAPElement) it.next();
 
-				// *** #4 ***
 				// get header element value
 				String headerValue = element.getValue();
-				// *** #5 ***
 				// put token in request context
-				System.out.println("HELOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
 				context.put("my.request.id", headerValue);
 				// set property scope to application so that server class can
 				// access property

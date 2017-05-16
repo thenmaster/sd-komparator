@@ -43,7 +43,7 @@ public class MediatorPortImpl implements MediatorPortType{
 	private MediatorEndpointManager endpointManager;
 
 	private MediatorClient secondaryLink = null;
-	
+
 	@Resource
 	private WebServiceContext wsc;
 
@@ -124,11 +124,10 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public synchronized ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
-		
 		Mediator m = Mediator.getInstance();
 		MessageContext mc = wsc.getMessageContext();
+		System.out.println((String) mc.get("my.request.id"));
 		int propertyValue = Integer.parseInt((String) mc.get("my.request.id"));
-		System.out.println("propertyValue: " + propertyValue);
 		System.out.println("LastMessageID(): " + m.getLastMessageID());
 		if (m.containsRequest(propertyValue))
 			return this.newShoppingResultView(m.getShoppingResult(m.getFromPurchasesByID(propertyValue)));
@@ -160,7 +159,7 @@ public class MediatorPortImpl implements MediatorPortType{
 		ShoppingResult sr = m.buyCart(this.endpointManager.getUddiURL(), cartId);
 
 		if (!this.endpointManager.isSecondary()){
-			this.secondaryLink.updateShopHistory(this.newShoppingResultView(sr), cartId);
+			this.secondaryLink.updateShopHistory(propertyValue, this.newShoppingResultView(sr), cartId);
 		}
 
 		return this.newShoppingResultView(sr);
@@ -169,7 +168,6 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public synchronized void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-		System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		Mediator m = Mediator.getInstance();
 		MessageContext mc = wsc.getMessageContext();
 		int propertyValue = Integer.parseInt((String) mc.get("my.request.id"));
@@ -179,7 +177,7 @@ public class MediatorPortImpl implements MediatorPortType{
 			return;
 		m.setLastMessageID(propertyValue);
 
-		
+
 		if(cartId == null)
 			this.invalidCartIdExceptionHelper("Null cart id!");
 		cartId = cartId.trim();
@@ -206,7 +204,7 @@ public class MediatorPortImpl implements MediatorPortType{
 				CartItem ci = new CartItem(p.getId(), itemId.getSupplierId(), p.getDesc(), p.getPrice(), itemQty);
 				m.addItem(cartId,ci);
 				if(!this.endpointManager.isSecondary())
-					this.secondaryLink.updateCart(cartId, this.newCartItemView(ci));
+					this.secondaryLink.updateCart(propertyValue, cartId, this.newCartItemView(ci));
 				return;
 			}
 			this.notEnoughItemsExceptionHelper("Too much quantity asked!");
@@ -234,14 +232,18 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	@Override
 	public void clear() {
-		try {
-			Collection<UDDIRecord> records = this.endpointManager.getUddiNaming().listRecords("A24_Supplier%");
-			for (UDDIRecord uddiRecord : records) {
-				SupplierClient s = new SupplierClient(this.endpointManager.getUddiURL(),uddiRecord.getOrgName());
-				s.clear();
+		if(!this.endpointManager.isSecondary()){
+			try {
+				Collection<UDDIRecord> records = this.endpointManager.getUddiNaming().listRecords("A24_Supplier%");
+				for (UDDIRecord uddiRecord : records) {
+					SupplierClient s = new SupplierClient(this.endpointManager.getUddiURL(),uddiRecord.getOrgName());
+					s.clear();
+				}
+			} catch (UDDINamingException e) {
+				//do nothing
 			}
-		} catch (UDDINamingException e) {
-			//do nothing
+			if(this.secondaryLink != null)
+				this.secondaryLink.clear();
 		}
 		Mediator.getInstance().reset();
 
@@ -361,15 +363,15 @@ public class MediatorPortImpl implements MediatorPortType{
 	}
 
 	@Override
-	public void updateShopHistory(ShoppingResultView shopResult, String cartId) {
+	public void updateShopHistory(int requestId, ShoppingResultView shopResult, String cartId) {
 		System.out.println("Updating secondary with buy cart operation..");
-		Mediator.getInstance().updateShopHistory(shopResult, cartId);
+		Mediator.getInstance().updateShopHistory(requestId, shopResult, cartId);
 	}
 
 	@Override
-	public void updateCart(String cartId, CartItemView itemId) {
+	public void updateCart(int requestId, String cartId, CartItemView itemId) {
 		System.out.println("Updating secondary with add to cart operation..");
-		Mediator.getInstance().updateCart(cartId, itemId);
+		Mediator.getInstance().updateCart(requestId,cartId, itemId);
 	}
 
 }
