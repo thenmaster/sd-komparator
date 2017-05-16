@@ -37,27 +37,29 @@ public class ClientIdentifierHandler implements SOAPHandler<SOAPMessageContext> 
 		Boolean outbound = (Boolean) context.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		if (outbound){
-			String propertyValue = (String) context.get("my.request.id");
-			try {
-				// get SOAP envelope
-				SOAPMessage msg = context.getMessage();
-				SOAPPart sp = msg.getSOAPPart();
-				SOAPEnvelope se = sp.getEnvelope();
-
-				// add header
-				SOAPHeader sh = se.getHeader();
-				if (sh == null)
-					sh = se.addHeader();
-
-				// add header element (name, namespace prefix, namespace)
-				Name name = se.createName("id", "i", "http://id");
-				SOAPHeaderElement element = sh.addHeaderElement(name);
-
-				// *** #3 ***
-				// add header element value
-				element.addTextNode(propertyValue);
-			} catch (SOAPException e) {
-				System.out.printf("Failed to add SOAP header because of %s%n", e);
+			if (context.get("my.request.id") != null){
+				String propertyValue = (String) context.get("my.request.id");
+				try {
+					// get SOAP envelope
+					SOAPMessage msg = context.getMessage();
+					SOAPPart sp = msg.getSOAPPart();
+					SOAPEnvelope se = sp.getEnvelope();
+	
+					// add header
+					SOAPHeader sh = se.getHeader();
+					if (sh == null)
+						sh = se.addHeader();
+	
+					// add header element (name, namespace prefix, namespace)
+					Name name = se.createName("id", "i", "http://id");
+					SOAPHeaderElement element = sh.addHeaderElement(name);
+	
+					// *** #3 ***
+					// add header element value
+					element.addTextNode(propertyValue);
+				} catch (SOAPException e) {
+					System.out.printf("Failed to add SOAP header because of %s%n", e);
+				}
 			}
 		}
 		return true;

@@ -122,7 +122,7 @@ public class MediatorPortImpl implements MediatorPortType{
 	}
 
 	@Override
-	public ShoppingResultView buyCart(String cartId, String creditCardNr)
+	public synchronized ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
 		
 		Mediator m = Mediator.getInstance();
@@ -167,7 +167,7 @@ public class MediatorPortImpl implements MediatorPortType{
 	}
 
 	@Override
-	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
+	public synchronized void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
 		System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		Mediator m = Mediator.getInstance();

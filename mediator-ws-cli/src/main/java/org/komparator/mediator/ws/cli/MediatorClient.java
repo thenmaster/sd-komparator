@@ -167,7 +167,6 @@ public class MediatorClient implements MediatorPortType {
      @Override
 	public void clear() {
         try {
-        	addIdToMessage();
     		port.clear();
         } catch(WebServiceException wse) {
             try {
@@ -183,7 +182,6 @@ public class MediatorClient implements MediatorPortType {
      @Override
 	public String ping(String arg0) {
         try {
-        	addIdToMessage();
     		return port.ping(arg0);
         } catch(WebServiceException wse) {
             try {
@@ -199,7 +197,6 @@ public class MediatorClient implements MediatorPortType {
      @Override
 	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
         try {
-        	addIdToMessage();
     		return port.searchItems(descText);
         } catch(WebServiceException wse) {
             try {
@@ -215,7 +212,6 @@ public class MediatorClient implements MediatorPortType {
      @Override
 	public List<CartView> listCarts() {
         try {
-        	addIdToMessage();
     		return port.listCarts();
         } catch(WebServiceException wse) {
             try {
@@ -231,7 +227,6 @@ public class MediatorClient implements MediatorPortType {
 	@Override
 	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
         try {
-        	addIdToMessage();
     		return port.getItems(productId);
         } catch(WebServiceException wse) {
             try {
@@ -283,7 +278,6 @@ public class MediatorClient implements MediatorPortType {
 	@Override
 	public List<ShoppingResultView> shopHistory() {
         try {
-        	addIdToMessage();
         	return port.shopHistory();
         } catch(WebServiceException wse) {
             try {
@@ -298,14 +292,12 @@ public class MediatorClient implements MediatorPortType {
 
 	@Override
 	public void imAlive() {
-		addIdToMessage();
     	port.imAlive();
 	}
 
 	@Override
 	public void updateShopHistory(ShoppingResultView shopResult, String cartId) {
         try {
-        	addIdToMessage();
         	port.updateShopHistory(shopResult, cartId);
         } catch(WebServiceException wse) {
             try {
@@ -321,7 +313,6 @@ public class MediatorClient implements MediatorPortType {
 	@Override
 	public void updateCart(String cartId, CartItemView itemId) {
         try {
-        	addIdToMessage();
         	port.updateCart(cartId, itemId);
         } catch(WebServiceException wse) {
             try {
