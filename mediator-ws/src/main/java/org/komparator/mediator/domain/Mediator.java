@@ -20,12 +20,12 @@ public class Mediator {
 	private Map<String, Cart> carts = new ConcurrentHashMap<>();
 
 	private Map<String, ShoppingResult> purchases = new ConcurrentHashMap<>();
+	
+	private Map<Integer, String> purchasesByID = new ConcurrentHashMap<>();
+	
+	private int lastMessageID = 0;
 
 	private AtomicInteger counter = new AtomicInteger(1); // counter for unique shopping Id's
-	
-	public ShoppingResult lastBuyMade(){
-		return purchases.get(counter.get());
-	}
 
 	private Mediator() {
 	}
@@ -44,6 +44,7 @@ public class Mediator {
 
 	public void addCart(String reference){
 		carts.put(reference, new Cart(reference));
+		this.purchasesByID.put(lastMessageID, "dummy");
 	}
 
 	public Set<String> getCartKeys(){
@@ -80,6 +81,7 @@ public class Mediator {
 		}
 
 		this.purchases.put(sr.getId(), sr);
+		this.purchasesByID.put(lastMessageID, sr.getId());
 		return sr;
 	}
 
@@ -109,6 +111,7 @@ public class Mediator {
 			sr.addNotPurchased(new CartItem(civ.getItem().getItemId().getProductId(), civ.getItem().getItemId().getSupplierId(), civ.getItem().getDesc(), civ.getItem().getPrice(), civ.getQuantity()));
 		}
 		this.purchases.put(sr.getId(), sr);
+		this.purchasesByID.put(lastMessageID, sr.getId());
 	}
 
 	public void updateCart(String id, CartItemView civ){
@@ -116,6 +119,23 @@ public class Mediator {
 			this.addCart(id);
 		Cart c = this.carts.get(id);
 		c.addItem(new CartItem(civ.getItem().getItemId().getProductId(), civ.getItem().getItemId().getSupplierId(), civ.getItem().getDesc(), civ.getItem().getPrice(), civ.getQuantity()));
+		this.purchasesByID.put(lastMessageID, "dummy");
+	}
+
+	public String getFromPurchasesByID(int propertyValue) {
+		return purchasesByID.get(propertyValue);
+	}
+
+	public int getLastMessageID() {
+		return lastMessageID;
+	}
+
+	public void setLastMessageID(int propertyValue) {
+		lastMessageID = propertyValue;
+	}
+
+	public boolean containsRequest(int propertyValue) {
+		return this.purchasesByID.containsKey(propertyValue);
 	}
 
 }

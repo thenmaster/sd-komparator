@@ -44,8 +44,6 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	private MediatorClient secondaryLink = null;
 	
-	private int lastMessageID = 0;
-	
 	@Resource
 	private WebServiceContext wsc;
 
@@ -126,9 +124,16 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
+		
 		Mediator m = Mediator.getInstance();
-		/*if (!checkMessageID())
-			return this.newShoppingResultView(m.lastBuyMade());*/
+		MessageContext mc = wsc.getMessageContext();
+		int propertyValue = Integer.parseInt((String) mc.get("my.request.id"));
+		System.out.println("propertyValue: " + propertyValue);
+		System.out.println("LastMessageID(): " + m.getLastMessageID());
+		if (m.containsRequest(propertyValue))
+			return this.newShoppingResultView(m.getShoppingResult(m.getFromPurchasesByID(propertyValue)));
+		m.setLastMessageID(propertyValue);
+
 		CreditCardClient cc = null;
 		if(cartId == null)
 			this.invalidCartIdExceptionHelper("Null cart id!");
@@ -164,9 +169,17 @@ public class MediatorPortImpl implements MediatorPortType{
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-		/*if (!checkMessageID())
-			return;*/
+		System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		Mediator m = Mediator.getInstance();
+		MessageContext mc = wsc.getMessageContext();
+		int propertyValue = Integer.parseInt((String) mc.get("my.request.id"));
+		System.out.println("propertyValue: " + propertyValue);
+		System.out.println("m.getLastMessageID(): " + m.getLastMessageID());
+		if (m.containsRequest(propertyValue))
+			return;
+		m.setLastMessageID(propertyValue);
+
+		
 		if(cartId == null)
 			this.invalidCartIdExceptionHelper("Null cart id!");
 		cartId = cartId.trim();
@@ -207,15 +220,6 @@ public class MediatorPortImpl implements MediatorPortType{
 	}
 
 	// Auxiliary operations --------------------------------------------------
-	
-	public boolean checkMessageID(){
-		MessageContext mc = wsc.getMessageContext();
-		int propertyValue = (int) mc.get("my.request.id");
-		if (propertyValue <= lastMessageID)
-			return false;
-		lastMessageID = propertyValue;
-		return true;
-	}
 
 	@Override
 	public List<CartView> listCarts() {
@@ -358,11 +362,13 @@ public class MediatorPortImpl implements MediatorPortType{
 
 	@Override
 	public void updateShopHistory(ShoppingResultView shopResult, String cartId) {
+		System.out.println("Updating secondary with buy cart operation..");
 		Mediator.getInstance().updateShopHistory(shopResult, cartId);
 	}
 
 	@Override
 	public void updateCart(String cartId, CartItemView itemId) {
+		System.out.println("Updating secondary with add to cart operation..");
 		Mediator.getInstance().updateCart(cartId, itemId);
 	}
 
