@@ -6,9 +6,10 @@ import java.time.LocalDateTime;
 import org.komparator.mediator.ws.cli.MediatorClient;
 
 public class LifeProof extends Thread {
+	private static final int MAX_TIME_BETWEEN_IM_ALIVE_MESSAGES = 7;
+	private static final int TIME_BETWEEN_IM_ALIVE_MESSAGES = 5;
 	private MediatorEndpointManager endpoint;
 	private MediatorClient client = null;
-	private int seconds = 5; 
 	private boolean running = true;
 	
 	public LifeProof(MediatorEndpointManager endpoint){
@@ -28,7 +29,7 @@ public class LifeProof extends Thread {
 						System.out.println("No secondary mediator running!");
 					}
 				} else {
-					if (endpoint.getLastAliveDate() != null && Duration.between(endpoint.getLastAliveDate(), LocalDateTime.now()).getSeconds() > 7){
+					if (endpoint.getLastAliveDate() != null && Duration.between(endpoint.getLastAliveDate(), LocalDateTime.now()).getSeconds() > MAX_TIME_BETWEEN_IM_ALIVE_MESSAGES){
 						//Secondary assumes primary role
 						endpoint.setWsPort("8072");
 						endpoint.setSecondary(false);
@@ -36,7 +37,7 @@ public class LifeProof extends Thread {
 						this.running = false;   //thread no longer needed after primary shutdown
 					}	
 				}
-				Thread.sleep(seconds*1000);	
+				Thread.sleep(1000*TIME_BETWEEN_IM_ALIVE_MESSAGES);	
 			} catch (Exception e){
 				System.out.println("Cant sleep!");
 			}

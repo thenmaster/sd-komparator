@@ -35,7 +35,9 @@ import pt.ulisboa.tecnico.sdis.ws.uddi.UDDINaming;
  */
 public class MediatorClient implements MediatorPortType {
 
-	 int messageID = 1;
+	 private static final int TIME_BETWEEN_RETRIES = 10;
+
+	int messageID = 1;
 
      /** WS service */
      MediatorService service = null;
@@ -166,130 +168,130 @@ public class MediatorClient implements MediatorPortType {
 
      @Override
 	public void clear() {
-        try {
-    		port.clear();
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return;
-			}
-    		port.clear();
-        }
+    	Boolean operationComplete = false;
+    	while(!operationComplete){
+	        try {
+	    		port.clear();
+	    		operationComplete = true;
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
      @Override
 	public String ping(String arg0) {
-        try {
-    		return port.ping(arg0);
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return null;
-			}
-    		return port.ping(arg0);
-        }
+    	while(true){
+	        try {
+	        	return port.ping(arg0);
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
      @Override
 	public List<ItemView> searchItems(String descText) throws InvalidText_Exception {
-        try {
-    		return port.searchItems(descText);
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return null;
-			}
-    		return port.searchItems(descText);
-        }
+    	while(true){
+	        try {
+	        	return port.searchItems(descText);
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
      @Override
 	public List<CartView> listCarts() {
-        try {
-    		return port.listCarts();
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return null;
-			}
-    		return port.listCarts();
-        }
+    	while(true){
+	        try {
+	        	return port.listCarts();
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
 	@Override
 	public List<ItemView> getItems(String productId) throws InvalidItemId_Exception {
-        try {
-    		return port.getItems(productId);
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return null;
-			}
-    		return port.getItems(productId);
-        }
+    	while(true){
+	        try {
+	        	return port.getItems(productId);
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
 	@Override
 	public ShoppingResultView buyCart(String cartId, String creditCardNr)
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
-        try {
-        	addIdToMessage();
-    		return port.buyCart(cartId, creditCardNr);
-        } catch(Exception wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return null;
-			}
-            addIdToMessage();
-    		return port.buyCart(cartId, creditCardNr);
-        }
+    	while(true){
+	        try {
+	        	addIdToMessage();
+	    		return port.buyCart(cartId, creditCardNr);
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
 	@Override
 	public void addToCart(String cartId, ItemIdView itemId, int itemQty) throws InvalidCartId_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-        try {
-        	addIdToMessage();
-			port.addToCart(cartId, itemId, itemQty);
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return;
-			}
-            addIdToMessage();
-		port.addToCart(cartId, itemId, itemQty);
-        }
-
-
+    	Boolean operationComplete = false;
+    	while(!operationComplete){
+	        try {
+	        	addIdToMessage();
+				port.addToCart(cartId, itemId, itemQty);
+	    		operationComplete = true;
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
 	@Override
 	public List<ShoppingResultView> shopHistory() {
-        try {
-        	return port.shopHistory();
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return null;
-			}
-            return port.shopHistory();
-        }
+    	while(true){
+	        try {
+	        	return port.shopHistory();
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
 	@Override
@@ -299,31 +301,35 @@ public class MediatorClient implements MediatorPortType {
 
 	@Override
 	public void updateShopHistory(int requestId, ShoppingResultView shopResult, String cartId) {
-        try {
-        	port.updateShopHistory(requestId,shopResult, cartId);
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return;
-			}
-            port.updateShopHistory(requestId, shopResult, cartId);
-        }
+    	Boolean operationComplete = false;
+    	while(!operationComplete){
+	        try {
+	        	port.updateShopHistory(requestId,shopResult, cartId);
+	    		operationComplete = true;
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 
 	@Override
 	public void updateCart(int requestId, String cartId, CartItemView itemId) {
-        try {
-        	port.updateCart(requestId, cartId, itemId);
-        } catch(WebServiceException wse) {
-            try {
-				uddiLookup();
-				createStub();
-			} catch (MediatorClientException e) {
-				return;
-			}
-            port.updateCart(requestId, cartId, itemId);
-        }
+    	Boolean operationComplete = false;
+    	while(!operationComplete){
+	        try {
+	        	port.updateCart(requestId, cartId, itemId);
+	    		operationComplete = true;
+	        } catch(WebServiceException wse) {
+	            try {
+	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
+					uddiLookup();
+					createStub();
+				} catch (MediatorClientException | InterruptedException e1) {}
+	        }
+    	}
 	}
 }
