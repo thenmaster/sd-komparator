@@ -126,9 +126,8 @@ public class MediatorPortImpl implements MediatorPortType{
 			throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception {
 		Mediator m = Mediator.getInstance();
 		MessageContext mc = wsc.getMessageContext();
-		System.out.println((String) mc.get("my.request.id"));
 		int propertyValue = Integer.parseInt((String) mc.get("my.request.id"));
-		System.out.println("LastMessageID(): " + m.getLastMessageID());
+
 		if (m.containsRequest(propertyValue))
 			return this.newShoppingResultView(m.getShoppingResult(m.getFromPurchasesByID(propertyValue)));
 		m.setLastMessageID(propertyValue);
@@ -171,8 +170,7 @@ public class MediatorPortImpl implements MediatorPortType{
 		Mediator m = Mediator.getInstance();
 		MessageContext mc = wsc.getMessageContext();
 		int propertyValue = Integer.parseInt((String) mc.get("my.request.id"));
-		System.out.println("propertyValue: " + propertyValue);
-		System.out.println("m.getLastMessageID(): " + m.getLastMessageID());
+
 		if (m.containsRequest(propertyValue))
 			return;
 		m.setLastMessageID(propertyValue);

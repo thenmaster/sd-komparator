@@ -306,7 +306,8 @@ public class BuyCartIT extends BaseIT {
 	@Test
 	public void testPrimaryMediatorFail() throws EmptyCart_Exception, InvalidCartId_Exception, InvalidCreditCard_Exception,
 			InvalidItemId_Exception, InvalidQuantity_Exception, NotEnoughItems_Exception {
-		// -- add products to carts --
+		
+		//xyz cart - 3 addCarts
 		{
 			ItemIdView id = new ItemIdView();
 			id.setProductId("p1");
@@ -327,6 +328,23 @@ public class BuyCartIT extends BaseIT {
 			id.setSupplierId(supplierNames[0]);
 			mediatorClient.addToCart("xyz", id, 3);
 		}
+		
+		//abc cart - 2 addCarts
+		{
+			ItemIdView id = new ItemIdView();
+			id.setProductId("p2");
+			id.setSupplierId(supplierNames[0]);
+			mediatorClient.addToCart("abc", id, 2);
+		}
+
+		{
+			ItemIdView id = new ItemIdView();
+			id.setProductId("p2");
+			id.setSupplierId(supplierNames[1]);
+			mediatorClient.addToCart("abc", id, 1);
+		}
+
+		
 
 		{ // product in other cart! (will not try to buy this)
 			ItemIdView id = new ItemIdView();
@@ -335,20 +353,46 @@ public class BuyCartIT extends BaseIT {
 			mediatorClient.addToCart("DoNotBuyMe", id, 1);
 		}
 		
-		System.out.println("Im gonna sleep!!!! KILL ME");
+		
+		//buy cart xyz
+		ShoppingResultView shpResView = mediatorClient.buyCart("xyz", VALID_CC);
+		
+		
+		
+		System.out.println("Im gonna sleep!!!! KILL the primary mediator!");
 		try {
 			Thread.sleep(20000);
 		} catch (InterruptedException e) {
 			System.out.println("Cant sleep.");
 		}
-
-		// -- buy a cart
-		ShoppingResultView shpResView = mediatorClient.buyCart("xyz", VALID_CC);
+		
+		
+		
+		//cart abc - one more addCart
+		{
+			ItemIdView id = new ItemIdView();
+			id.setProductId("p3");
+			id.setSupplierId(supplierNames[0]);
+			mediatorClient.addToCart("abc", id, 3);
+		}
+		
+		//buy cart abc
+		ShoppingResultView shpResView2 = mediatorClient.buyCart("abc", VALID_CC);
+		
+		//check buy xyz
 		assertNotNull(shpResView.getId());
 		assertEquals(Result.COMPLETE, shpResView.getResult());
 		assertEquals(0, shpResView.getDroppedItems().size());
 		assertEquals(3, shpResView.getPurchasedItems().size());
 		final int expectedTotalPrice = 2 * 3 + 1 * 4 + 3 * 9; // sum(qty*price)
 		assertEquals(expectedTotalPrice, shpResView.getTotalPrice());
+		
+		//check buy abc
+		assertNotNull(shpResView2.getId());
+		assertEquals(Result.COMPLETE, shpResView2.getResult());
+		assertEquals(0, shpResView2.getDroppedItems().size());
+		assertEquals(3, shpResView2.getPurchasedItems().size());
+		final int expectedTotalPrice2 = 2 * 9 + 1 * 8 + 3 * 15; // sum(qty*price)
+		assertEquals(expectedTotalPrice2, shpResView2.getTotalPrice());
 	}
 }

@@ -117,7 +117,6 @@ public class MediatorClient implements MediatorPortType {
         Map<String, Object> requestContext = bindingProvider
                 .getRequestContext();
         requestContext.put("my.request.id", Integer.toString(messageID));
-        this.messageID++;
     }
 
 	/** UDDI lookup */
@@ -249,7 +248,9 @@ public class MediatorClient implements MediatorPortType {
     	while(true){
 	        try {
 	        	addIdToMessage();
-	    		return port.buyCart(cartId, creditCardNr);
+	        	ShoppingResultView a = port.buyCart(cartId, creditCardNr);
+	        	messageID++;
+	    		return a;
 	        } catch(WebServiceException wse) {
 	            try {
 	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);
@@ -269,6 +270,7 @@ public class MediatorClient implements MediatorPortType {
 	        	addIdToMessage();
 				port.addToCart(cartId, itemId, itemQty);
 	    		operationComplete = true;
+	    		messageID++;
 	        } catch(WebServiceException wse) {
 	            try {
 	            	Thread.sleep(TIME_BETWEEN_RETRIES*1000);

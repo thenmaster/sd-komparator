@@ -32,7 +32,6 @@ public class LifeProof extends Thread {
 					if (endpoint.getLastAliveDate() != null && Duration.between(endpoint.getLastAliveDate(), LocalDateTime.now()).getSeconds() > MAX_TIME_BETWEEN_IM_ALIVE_MESSAGES){
 						//Secondary assumes primary role
 						endpoint.setWsPort("8072");
-						endpoint.setSecondary(false);
 						endpoint.publishToUDDI();
 						this.running = false;   //thread no longer needed after primary shutdown
 					}	
